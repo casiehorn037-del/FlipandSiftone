@@ -48,11 +48,11 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  // In production, the server is bundled to dist/index.js
-  // The client build output is at dist/public (relative to project root)
-  // When running from dist/index.js, we need to go up one level to find dist/public
+  // In production, the server is bundled to dist/index.js by esbuild
+  // The client build output is at dist/public (from vite.config.prod.ts)
+  // So from dist/index.js, dist/public is at ./public (same directory)
   
-  const distPublicPath = path.resolve(import.meta.dirname, "..", "public");
+  const distPublicPath = path.resolve(import.meta.dirname, "public");
   
   console.log("[serveStatic] __dirname:", import.meta.dirname);
   console.log("[serveStatic] Attempting to serve from:", distPublicPath);
