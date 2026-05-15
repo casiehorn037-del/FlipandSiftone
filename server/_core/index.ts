@@ -32,6 +32,16 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
+  // Debug endpoint
+  app.get("/debug", (_req, res) => {
+    res.json({
+      cwd: process.cwd(),
+      dirname: import.meta.dirname,
+      nodeEnv: process.env.NODE_ENV,
+      port: process.env.PORT,
+    });
+  });
+
   // Health check endpoint for Render
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
