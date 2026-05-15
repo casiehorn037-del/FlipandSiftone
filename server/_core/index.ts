@@ -56,6 +56,27 @@ async function startServer() {
     });
   });
 
+  // TEMP: Direct file check endpoint
+  app.get("/check-files", (_req, res) => {
+    const fs = require("fs");
+    const path = require("path");
+    const checkPath = (p: string) => {
+      try {
+        return { path: p, exists: fs.existsSync(p), isDir: fs.statSync(p).isDirectory() };
+      } catch {
+        return { path: p, exists: false };
+      }
+    };
+    
+    res.json({
+      cwd: process.cwd(),
+      distPublic: checkPath(path.resolve(process.cwd(), "dist", "public")),
+      dist: checkPath(path.resolve(process.cwd(), "dist")),
+      src: checkPath(path.resolve(process.cwd(), "src")),
+      files: fs.readdirSync(process.cwd()).slice(0, 20),
+    });
+  });
+
   // Stripe webhook MUST come before express.json() for signature verification
   const { registerStripeWebhook } = await import("../stripeWebhook");
   app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req, res, next) => next());
