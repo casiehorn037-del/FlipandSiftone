@@ -12,9 +12,7 @@ services:
       - key: NODE_VERSION
         value: 20.11.0
       - key: DATABASE_URL
-        fromDatabase:
-          name: flipandsift-db
-          property: connectionString
+        sync: false
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
@@ -55,9 +53,3 @@ services:
         value: FlipandSift
       - key: PORT
         value: 10000
-
-databases:
-  - name: flipandsift-db
-    plan: free
-    databaseName: flipandsift
-    user: flipandsift
