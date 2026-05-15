@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
+import fs from "fs";
+import path from "path";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
@@ -34,8 +36,6 @@ async function startServer() {
 
   // Root page with debug info
   app.get("/", (_req, res) => {
-    const fs = require("fs");
-    const path = require("path");
     const distExists = fs.existsSync(path.resolve(process.cwd(), "dist", "public"));
     
     res.send(`
@@ -62,8 +62,6 @@ async function startServer() {
 
   // Debug endpoint (BEFORE static files)
   app.get("/debug", (_req, res) => {
-    const fs = require("fs");
-    const path = require("path");
     const possiblePaths = [
       path.resolve(process.cwd(), "dist", "public"),
       path.resolve("/opt/render/project/src/dist/public"),
@@ -81,8 +79,6 @@ async function startServer() {
 
   // TEMP: Direct file check endpoint
   app.get("/check-files", (_req, res) => {
-    const fs = require("fs");
-    const path = require("path");
     const checkPath = (p: string) => {
       try {
         return { path: p, exists: fs.existsSync(p), isDir: fs.statSync(p).isDirectory() };
