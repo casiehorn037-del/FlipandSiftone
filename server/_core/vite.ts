@@ -48,24 +48,44 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  // In production (built with esbuild), the server is at dist/index.js
-  // So we need to go up one level to find dist/public
-  const distPath = path.resolve(import.meta.dirname, "..", "public");
+  // Try multiple possible paths for the static files
+  const possiblePaths = [
+    path.resolve(import.meta.dirname, "..", "public"),      // dist/public (when server is at dist/index.js)
+    path.resolve(import.meta.dirname, "..", "..", "dist", "public"), // project-root/dist/public
+    path.resolve(process.cwd(), "dist", "public"),          // cwd/dist/public
+    path.resolve("/opt/render/project/src/dist/public"),    // Render specific path
+  ];
 
-  if (!fs.existsSync(distPath)) {
-    console.error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`
-    );
-    // Try alternative path for development
-    const devPath = path.resolve(import.meta.dirname, "../..", "dist", "public");
-    if (fs.existsSync(devPath)) {
-      console.log(`Using development path: ${devPath}`);
-      app.use(express.static(devPath));
-      app.use("*", (_req, res) => {
-        res.sendFile(path.resolve(devPath, "index.html"));
-      });
-      return;
+  let distPath: string | null = null;
+
+  for (const testPath of possiblePaths) {
+    console.log(`Checking path: ${testPath}`);
+    if (fs.existsSync(testPath)) {
+      console.log(`Found static files at: ${testPath}`);
+      distPath = testPath;
+      break;
     }
+  }
+
+  if (!distPath) {
+    console.error("Could not find static files in any of the expected locations");
+    console.error("Checked paths:", possiblePaths);
+    console.error("Current directory:", process.cwd());
+    console.error("__dirname:", import.meta.dirname);
+    
+    // Return a helpful error page
+    app.use("*", (_req, res) => {
+      res.status(500).send(`
+        <html>
+          <body>
+            <h1>Server Error</h1>
+            <p>Could not find static files. Please check the build.</p>
+            <pre>Checked paths:\n${possiblePaths.join("\n")}</pre>
+          </body>
+        </html>
+      `);
+    });
+    return;
   }
 
   console.log(`Serving static files from: ${distPath}`);
@@ -73,6 +93,6 @@ export function serveStatic(app: Express) {
 
   // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+    res.sendFile(path.resolve(distPath!, "index.html"));
   });
 }
