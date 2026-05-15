@@ -58,6 +58,6 @@ services:
 
 databases:
   - name: flipandsift-db
-    plan: starter
+    plan: free
     databaseName: flipandsift
     user: flipandsift
