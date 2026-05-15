@@ -1,0 +1,63 @@
+services:
+  - type: web
+    name: flipandsift
+    runtime: node
+    plan: standard
+    buildCommand: npm install -g pnpm && pnpm install --frozen-lockfile && pnpm build
+    startCommand: pnpm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 20.11.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: flipandsift-db
+          property: connectionString
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PRICE_ID
+        sync: false
+      - key: FIRECRAWL_API_KEY
+        sync: false
+      - key: DATAFORSEO_LOGIN
+        sync: false
+      - key: DATAFORSEO_PASSWORD
+        sync: false
+      - key: NAMECHEAP_USERNAME
+        sync: false
+      - key: NAMECHEAP_API_KEY
+        sync: false
+      - key: NAMECHEAP_CLIENT_IP
+        sync: false
+      - key: GODADDY_API_KEY
+        sync: false
+      - key: GODADDY_API_SECRET
+        sync: false
+      - key: PORKBUN_API_KEY
+        sync: false
+      - key: PORKBUN_SECRET_KEY
+        sync: false
+      - key: HOSTINGER_API_KEY
+        sync: false
+      - key: MANUS_API_KEY
+        sync: false
+      - key: MANUS_CLIENT_ID
+        sync: false
+      - key: MANUS_REDIRECT_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: VITE_APP_TITLE
+        value: FlipandSift
+      - key: PORT
+        value: 10000
+
+databases:
+  - name: flipandsift-db
+    plan: standard
+    databaseName: flipandsift
+    user: flipandsift

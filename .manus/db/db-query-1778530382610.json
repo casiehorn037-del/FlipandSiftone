@@ -1,0 +1,253 @@
+{
+  "query": "SHOW TABLES;\nSHOW COLUMNS FROM `userProjects`;\nSHOW COLUMNS FROM `userSettings`;\nSHOW COLUMNS FROM `monitoringLogs`;\nSHOW COLUMNS FROM `priceAlerts`;\nSHOW COLUMNS FROM `domains`;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4BfoCqZAhbST9ZA.d5b78e64e9a1 --database QoCGi8ofuGbCNjSpt6gkfy --execute SHOW TABLES;\nSHOW COLUMNS FROM `userProjects`;\nSHOW COLUMNS FROM `userSettings`;\nSHOW COLUMNS FROM `monitoringLogs`;\nSHOW COLUMNS FROM `priceAlerts`;\nSHOW COLUMNS FROM `domains`;",
+  "rows": [
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "analysisSessions"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "analyzedDomains"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "apiKeys"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "cache"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "creditTransactions"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "domainComments"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "domainRecommendations"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "domainSuggestions"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "domains"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "forensicAnalysisResults"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "ipRateLimits"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "launchPlans"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "launchTasks"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "monitoringLogs"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "nicheAnalysis"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "priceAlerts"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "priceHistory"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "projectDomains"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "projectKeywords"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "pulseReports"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "savedComparisons"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "usageLog"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "userProjects"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "userSettings"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "users"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "watchlist"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "weeklyPulseChecks"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "Field\tType\tNull\tKey\tDefault\tExtra"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "id\tint\tNO\tPRI\tNULL\tauto_increment"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "userId\tint\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "projectName\tvarchar(255)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "niche\tvarchar(255)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "industry\tvarchar(255)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "keywords\ttext\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "targetAudience\ttext\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "description\ttext\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "goals\ttext\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "preferredExtensions\ttext\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "namingStyle\tvarchar(50)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "competitorUrl\tvarchar(500)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "createdAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "updatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "Field\tType\tNull\tKey\tDefault\tExtra"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "id\tint\tNO\tPRI\tNULL\tauto_increment"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "userId\tint\tNO\tUNI\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "namecheapApiKey\tvarchar(255)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "namecheapUsername\tvarchar(255)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "godaddyApiKey\tvarchar(255)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "godaddyApiSecret\tvarchar(255)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "porkbunApiKey\tvarchar(255)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "porkbunSecretKey\tvarchar(255)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "notificationsEnabled\tint\tNO\t\t1\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "onboardingCompleted\tint\tNO\t\t0\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "updatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "Field\tType\tNull\tKey\tDefault\tExtra"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "id\tint\tNO\tPRI\tNULL\tauto_increment"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "alertId\tint\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "domainName\tvarchar(255)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "currentPrice\tint\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "targetPrice\tint\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "triggered\tint\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "notificationSent\tint\tNO\t\t0\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "message\ttext\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "createdAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "Field\tType\tNull\tKey\tDefault\tExtra"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "id\tint\tNO\tPRI\tNULL\tauto_increment"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "userId\tint\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "domainId\tint\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "targetPrice\tint\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "isActive\tint\tNO\t\t1\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "lastChecked\ttimestamp\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "createdAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "updatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "Field\tType\tNull\tKey\tDefault\tExtra"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "id\tint\tNO\tPRI\tNULL\tauto_increment"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "name\tvarchar(255)\tNO\tUNI\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "currentPrice\tint\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "lastChecked\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "createdAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t"
+    },
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy": "updatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_QoCGi8ofuGbCNjSpt6gkfy\n__drizzle_migrations\nanalysisSessions\nanalyzedDomains\napiKeys\ncache\ncreditTransactions\ndomainComments\ndomainRecommendations\ndomainSuggestions\ndomains\nforensicAnalysisResults\nipRateLimits\nlaunchPlans\nlaunchTasks\nmonitoringLogs\nnicheAnalysis\npriceAlerts\npriceHistory\nprojectDomains\nprojectKeywords\npulseReports\nsavedComparisons\nusageLog\nuserProjects\nuserSettings\nusers\nwatchlist\nweeklyPulseChecks\nField\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nuserId\tint\tNO\t\tNULL\t\nprojectName\tvarchar(255)\tNO\t\tNULL\t\nniche\tvarchar(255)\tYES\t\tNULL\t\nindustry\tvarchar(255)\tYES\t\tNULL\t\nkeywords\ttext\tYES\t\tNULL\t\ntargetAudience\ttext\tYES\t\tNULL\t\ndescription\ttext\tYES\t\tNULL\t\ngoals\ttext\tYES\t\tNULL\t\npreferredExtensions\ttext\tYES\t\tNULL\t\nnamingStyle\tvarchar(50)\tYES\t\tNULL\t\ncompetitorUrl\tvarchar(500)\tYES\t\tNULL\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nField\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nuserId\tint\tNO\tUNI\tNULL\t\nnamecheapApiKey\tvarchar(255)\tYES\t\tNULL\t\nnamecheapUsername\tvarchar(255)\tYES\t\tNULL\t\ngodaddyApiKey\tvarchar(255)\tYES\t\tNULL\t\ngodaddyApiSecret\tvarchar(255)\tYES\t\tNULL\t\nporkbunApiKey\tvarchar(255)\tYES\t\tNULL\t\nporkbunSecretKey\tvarchar(255)\tYES\t\tNULL\t\nnotificationsEnabled\tint\tNO\t\t1\t\nonboardingCompleted\tint\tNO\t\t0\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nField\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nalertId\tint\tYES\t\tNULL\t\ndomainName\tvarchar(255)\tNO\t\tNULL\t\ncurrentPrice\tint\tNO\t\tNULL\t\ntargetPrice\tint\tNO\t\tNULL\t\ntriggered\tint\tNO\t\tNULL\t\nnotificationSent\tint\tNO\t\t0\t\nmessage\ttext\tYES\t\tNULL\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nField\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nuserId\tint\tNO\t\tNULL\t\ndomainId\tint\tNO\t\tNULL\t\ntargetPrice\tint\tNO\t\tNULL\t\nisActive\tint\tNO\t\t1\t\nlastChecked\ttimestamp\tYES\t\tNULL\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nField\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nname\tvarchar(255)\tNO\tUNI\tNULL\t\ncurrentPrice\tint\tNO\t\tNULL\t\nlastChecked\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\n",
+  "stderr": "",
+  "execution_time_ms": 304
+}

@@ -1,0 +1,122 @@
+{
+  "query": "\nSELECT TABLE_NAME, COUNT(*) as col_count \nFROM information_schema.COLUMNS \nWHERE TABLE_SCHEMA = DATABASE() \nGROUP BY TABLE_NAME \nORDER BY TABLE_NAME;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4BfoCqZAhbST9ZA.d5b78e64e9a1 --database QoCGi8ofuGbCNjSpt6gkfy --execute \nSELECT TABLE_NAME, COUNT(*) as col_count \nFROM information_schema.COLUMNS \nWHERE TABLE_SCHEMA = DATABASE() \nGROUP BY TABLE_NAME \nORDER BY TABLE_NAME;\n",
+  "rows": [
+    {
+      "TABLE_NAME": "__drizzle_migrations",
+      "col_count": "3"
+    },
+    {
+      "TABLE_NAME": "analysisSessions",
+      "col_count": "10"
+    },
+    {
+      "TABLE_NAME": "analyzedDomains",
+      "col_count": "16"
+    },
+    {
+      "TABLE_NAME": "apiKeys",
+      "col_count": "8"
+    },
+    {
+      "TABLE_NAME": "cache",
+      "col_count": "5"
+    },
+    {
+      "TABLE_NAME": "creditTransactions",
+      "col_count": "9"
+    },
+    {
+      "TABLE_NAME": "domainComments",
+      "col_count": "6"
+    },
+    {
+      "TABLE_NAME": "domainRecommendations",
+      "col_count": "9"
+    },
+    {
+      "TABLE_NAME": "domainSuggestions",
+      "col_count": "9"
+    },
+    {
+      "TABLE_NAME": "domains",
+      "col_count": "6"
+    },
+    {
+      "TABLE_NAME": "forensicAnalysisResults",
+      "col_count": "11"
+    },
+    {
+      "TABLE_NAME": "ipRateLimits",
+      "col_count": "8"
+    },
+    {
+      "TABLE_NAME": "launchPlans",
+      "col_count": "11"
+    },
+    {
+      "TABLE_NAME": "launchTasks",
+      "col_count": "16"
+    },
+    {
+      "TABLE_NAME": "monitoringLogs",
+      "col_count": "9"
+    },
+    {
+      "TABLE_NAME": "nicheAnalysis",
+      "col_count": "10"
+    },
+    {
+      "TABLE_NAME": "priceAlerts",
+      "col_count": "8"
+    },
+    {
+      "TABLE_NAME": "priceHistory",
+      "col_count": "4"
+    },
+    {
+      "TABLE_NAME": "projectDomains",
+      "col_count": "8"
+    },
+    {
+      "TABLE_NAME": "projectKeywords",
+      "col_count": "12"
+    },
+    {
+      "TABLE_NAME": "pulseReports",
+      "col_count": "11"
+    },
+    {
+      "TABLE_NAME": "savedComparisons",
+      "col_count": "7"
+    },
+    {
+      "TABLE_NAME": "usageLog",
+      "col_count": "6"
+    },
+    {
+      "TABLE_NAME": "userProjects",
+      "col_count": "14"
+    },
+    {
+      "TABLE_NAME": "userSettings",
+      "col_count": "20"
+    },
+    {
+      "TABLE_NAME": "users",
+      "col_count": "20"
+    },
+    {
+      "TABLE_NAME": "watchlist",
+      "col_count": "9"
+    },
+    {
+      "TABLE_NAME": "weeklyPulseChecks",
+      "col_count": "12"
+    }
+  ],
+  "messages": [],
+  "stdout": "TABLE_NAME\tcol_count\n__drizzle_migrations\t3\nanalysisSessions\t10\nanalyzedDomains\t16\napiKeys\t8\ncache\t5\ncreditTransactions\t9\ndomainComments\t6\ndomainRecommendations\t9\ndomainSuggestions\t9\ndomains\t6\nforensicAnalysisResults\t11\nipRateLimits\t8\nlaunchPlans\t11\nlaunchTasks\t16\nmonitoringLogs\t9\nnicheAnalysis\t10\npriceAlerts\t8\npriceHistory\t4\nprojectDomains\t8\nprojectKeywords\t12\npulseReports\t11\nsavedComparisons\t7\nusageLog\t6\nuserProjects\t14\nuserSettings\t20\nusers\t20\nwatchlist\t9\nweeklyPulseChecks\t12\n",
+  "stderr": "",
+  "execution_time_ms": 831
+}

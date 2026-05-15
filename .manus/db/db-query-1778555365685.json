@@ -1,0 +1,20 @@
+{
+  "query": "\nUPDATE users SET \n  plan = 'pro', \n  tier = 'pro', \n  subscriptionStatus = 'ACTIVE',\n  role = 'admin',\n  credits = 1000,\n  analysisCount = 0\nWHERE id = 1;\n\nSELECT id, name, email, role, plan, tier, subscriptionStatus, credits FROM users WHERE id = 1;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4BfoCqZAhbST9ZA.d5b78e64e9a1 --database QoCGi8ofuGbCNjSpt6gkfy --execute \nUPDATE users SET \n  plan = 'pro', \n  tier = 'pro', \n  subscriptionStatus = 'ACTIVE',\n  role = 'admin',\n  credits = 1000,\n  analysisCount = 0\nWHERE id = 1;\n\nSELECT id, name, email, role, plan, tier, subscriptionStatus, credits FROM users WHERE id = 1;\n",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Horace A",
+      "email": "serfindah895@gmail.com",
+      "role": "admin",
+      "plan": "pro",
+      "tier": "pro",
+      "subscriptionStatus": "ACTIVE",
+      "credits": "1000"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\tplan\ttier\tsubscriptionStatus\tcredits\n1\tHorace A\tserfindah895@gmail.com\tadmin\tpro\tpro\tACTIVE\t1000\n",
+  "stderr": "",
+  "execution_time_ms": 271
+}

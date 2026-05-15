@@ -1,0 +1,9 @@
+{
+  "query": "\nALTER TABLE users\n  ADD COLUMN IF NOT EXISTS `plan` ENUM('free','pro','enterprise') NOT NULL DEFAULT 'free',\n  ADD COLUMN IF NOT EXISTS `subscriptionExpiry` TIMESTAMP NULL DEFAULT NULL,\n  ADD COLUMN IF NOT EXISTS `subscriptionStatus` ENUM('ACTIVE','CANCELED','PAST_DUE','TRIALING','NONE') NOT NULL DEFAULT 'NONE',\n  ADD COLUMN IF NOT EXISTS `subscriptionId` VARCHAR(255) NULL DEFAULT NULL,\n  ADD COLUMN IF NOT EXISTS `credits` INT NOT NULL DEFAULT 0,\n  ADD COLUMN IF NOT EXISTS `lastResetDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  ADD COLUMN IF NOT EXISTS `onboardingCompleted` TINYINT(1) NOT NULL DEFAULT 0;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4BfoCqZAhbST9ZA.d5b78e64e9a1 --database QoCGi8ofuGbCNjSpt6gkfy --execute \nALTER TABLE users\n  ADD COLUMN IF NOT EXISTS `plan` ENUM('free','pro','enterprise') NOT NULL DEFAULT 'free',\n  ADD COLUMN IF NOT EXISTS `subscriptionExpiry` TIMESTAMP NULL DEFAULT NULL,\n  ADD COLUMN IF NOT EXISTS `subscriptionStatus` ENUM('ACTIVE','CANCELED','PAST_DUE','TRIALING','NONE') NOT NULL DEFAULT 'NONE',\n  ADD COLUMN IF NOT EXISTS `subscriptionId` VARCHAR(255) NULL DEFAULT NULL,\n  ADD COLUMN IF NOT EXISTS `credits` INT NOT NULL DEFAULT 0,\n  ADD COLUMN IF NOT EXISTS `lastResetDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  ADD COLUMN IF NOT EXISTS `onboardingCompleted` TINYINT(1) NOT NULL DEFAULT 0;\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1147
+}
