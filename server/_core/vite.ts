@@ -48,39 +48,39 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  // Try multiple possible paths for the static files
-  const possiblePaths = [
-    path.resolve(import.meta.dirname, "..", "public"),      // dist/public (when server is at dist/index.js)
-    path.resolve(import.meta.dirname, "..", "..", "dist", "public"), // project-root/dist/public
-    path.resolve(process.cwd(), "dist", "public"),          // cwd/dist/public
-    path.resolve("/opt/render/project/src/dist/public"),    // Render specific path
-  ];
-
-  let distPath: string | null = null;
-
-  for (const testPath of possiblePaths) {
-    console.log(`Checking path: ${testPath}`);
-    if (fs.existsSync(testPath)) {
-      console.log(`Found static files at: ${testPath}`);
-      distPath = testPath;
-      break;
-    }
-  }
-
-  if (!distPath) {
-    console.error("Could not find static files in any of the expected locations");
-    console.error("Checked paths:", possiblePaths);
-    console.error("Current directory:", process.cwd());
-    console.error("__dirname:", import.meta.dirname);
+  // In production, the server is bundled to dist/index.js
+  // The client build output is at dist/public (relative to project root)
+  // When running from dist/index.js, we need to go up one level to find dist/public
+  
+  const distPublicPath = path.resolve(import.meta.dirname, "..", "public");
+  
+  console.log("[serveStatic] __dirname:", import.meta.dirname);
+  console.log("[serveStatic] Attempting to serve from:", distPublicPath);
+  console.log("[serveStatic] Path exists:", fs.existsSync(distPublicPath));
+  
+  if (!fs.existsSync(distPublicPath)) {
+    console.error("[serveStatic] ERROR: dist/public not found at", distPublicPath);
+    console.error("[serveStatic] CWD:", process.cwd());
     
-    // Return a helpful error page
-    app.use("*", (_req, res) => {
+    // List what's in the current directory for debugging
+    try {
+      const files = fs.readdirSync(process.cwd());
+      console.error("[serveStatic] Files in CWD:", files);
+    } catch (e) {
+      console.error("[serveStatic] Could not list CWD:", e);
+    }
+    
+    // Return error for all routes
+    app.get("*", (_req, res) => {
       res.status(500).send(`
+        <!DOCTYPE html>
         <html>
-          <body>
-            <h1>Server Error</h1>
-            <p>Could not find static files. Please check the build.</p>
-            <pre>Checked paths:\n${possiblePaths.join("\n")}</pre>
+          <head><title>FlipandSift - Error</title></head>
+          <body style="font-family: sans-serif; padding: 40px;">
+            <h1>Build Error</h1>
+            <p>The frontend build files are missing.</p>
+            <p>Expected path: ${distPublicPath}</p>
+            <p>Current directory: ${process.cwd()}</p>
           </body>
         </html>
       `);
@@ -88,11 +88,24 @@ export function serveStatic(app: Express) {
     return;
   }
 
-  console.log(`Serving static files from: ${distPath}`);
-  app.use(express.static(distPath));
+  // Serve static files
+  app.use(express.static(distPublicPath, {
+    maxAge: "1d",
+    etag: true
+  }));
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath!, "index.html"));
+  // SPA fallback - serve index.html for all non-API routes
+  app.get("*", (req, res) => {
+    // Don't interfere with API routes
+    if (req.path.startsWith("/api/")) {
+      return res.status(404).json({ error: "API endpoint not found" });
+    }
+    
+    const indexPath = path.join(distPublicPath, "index.html");
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.status(500).send("index.html not found in build");
+    }
   });
 }
