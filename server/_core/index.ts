@@ -34,30 +34,20 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
-  // Root page with debug info
-  app.get("/", (_req, res) => {
-    const distExists = fs.existsSync(path.resolve(process.cwd(), "dist", "public"));
-    
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-        <head><title>FlipandSift</title></head>
-        <body style="font-family: sans-serif; padding: 40px;">
-          <h1>FlipandSift is running!</h1>
-          <p>Environment: ${process.env.NODE_ENV}</p>
-          <p>Working directory: ${process.cwd()}</p>
-          <p>dist/public exists: ${distExists}</p>
-          <p><a href="/api/health">Health check</a></p>
-          <p><a href="/debug">Debug</a></p>
-          <p><a href="/check-files">Check files</a></p>
-        </body>
-      </html>
-    `);
-  });
-
   // Health check endpoint for Render (BEFORE static files)
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
+  // Debug endpoint (BEFORE static files)
+  app.get("/debug-server", (_req, res) => {
+    const distExists = fs.existsSync(path.resolve(process.cwd(), "dist", "public"));
+    res.json({
+      cwd: process.cwd(),
+      nodeEnv: process.env.NODE_ENV,
+      distPublicExists: distExists,
+      message: "Server is running"
+    });
   });
 
   // Debug endpoint (BEFORE static files)
