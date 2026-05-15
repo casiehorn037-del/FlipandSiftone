@@ -68,6 +68,17 @@
 
   <body>
     <div id="root"></div>
+    <div id="error-display" style="display: none; padding: 20px; background: #fee; color: #c00; font-family: sans-serif;"></div>
+    <script>
+      window.onerror = function(msg, url, line, col, error) {
+        const display = document.getElementById('error-display');
+        if (display) {
+          display.style.display = 'block';
+          display.innerHTML = '<h2>JavaScript Error</h2><pre>' + msg + '\nAt: ' + url + ':' + line + '</pre>';
+        }
+        console.error('Global error:', msg, url, line, col, error);
+      };
+    </script>
     <script type="module" src="/src/main.tsx"></script>
     <script
       defer
