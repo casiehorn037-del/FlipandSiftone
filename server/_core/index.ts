@@ -32,13 +32,46 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
+  // Simple HTML response for root
+  app.get("/", (_req, res) => {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>FlipandSift</title>
+          <style>
+            body { font-family: sans-serif; padding: 40px; }
+            h1 { color: #4f46e5; }
+          </style>
+        </head>
+        <body>
+          <h1>FlipandSift is running!</h1>
+          <p>The server is working but the frontend build may be missing.</p>
+          <p>Environment: ${process.env.NODE_ENV}</p>
+          <p>Working directory: ${process.cwd()}</p>
+          <p><a href="/debug">Debug info</a></p>
+          <p><a href="/api/health">Health check</a></p>
+        </body>
+      </html>
+    `);
+  });
+
   // Debug endpoint
   app.get("/debug", (_req, res) => {
+    const fs = require("fs");
+    const path = require("path");
+    const possiblePaths = [
+      path.resolve(process.cwd(), "dist", "public"),
+      path.resolve("/opt/render/project/src/dist/public"),
+      path.resolve("/opt/render/project/dist/public"),
+    ];
+    
     res.json({
       cwd: process.cwd(),
       dirname: import.meta.dirname,
       nodeEnv: process.env.NODE_ENV,
       port: process.env.PORT,
+      checkedPaths: possiblePaths.map(p => ({ path: p, exists: fs.existsSync(p) })),
     });
   });
 
