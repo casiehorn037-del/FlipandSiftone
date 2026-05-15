@@ -32,31 +32,12 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
-  // Simple HTML response for root
-  app.get("/", (_req, res) => {
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>FlipandSift</title>
-          <style>
-            body { font-family: sans-serif; padding: 40px; }
-            h1 { color: #4f46e5; }
-          </style>
-        </head>
-        <body>
-          <h1>FlipandSift is running!</h1>
-          <p>The server is working but the frontend build may be missing.</p>
-          <p>Environment: ${process.env.NODE_ENV}</p>
-          <p>Working directory: ${process.cwd()}</p>
-          <p><a href="/debug">Debug info</a></p>
-          <p><a href="/api/health">Health check</a></p>
-        </body>
-      </html>
-    `);
+  // Health check endpoint for Render (BEFORE static files)
+  app.get("/api/health", (_req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
-  // Debug endpoint
+  // Debug endpoint (BEFORE static files)
   app.get("/debug", (_req, res) => {
     const fs = require("fs");
     const path = require("path");
@@ -73,11 +54,6 @@ async function startServer() {
       port: process.env.PORT,
       checkedPaths: possiblePaths.map(p => ({ path: p, exists: fs.existsSync(p) })),
     });
-  });
-
-  // Health check endpoint for Render
-  app.get("/api/health", (_req, res) => {
-    res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
   // Stripe webhook MUST come before express.json() for signature verification
