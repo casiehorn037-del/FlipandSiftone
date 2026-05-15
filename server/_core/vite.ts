@@ -48,51 +48,20 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  // Try multiple possible paths for the static files
-  const possiblePaths = [
-    path.resolve(import.meta.dirname, "public"),           // dist/public (if server is at dist/index.js)
-    path.resolve(import.meta.dirname, "..", "public"),     // dist/public (if server is at dist/_core/index.js)
-    path.resolve(process.cwd(), "dist", "public"),         // ./dist/public from cwd
-    path.resolve("/opt/render/project/src/dist/public"),   // Render absolute path
-  ];
+  // In production, the server is bundled to dist/index.js by esbuild
+  // The client build output is at dist/public (from vite.config.prod.ts)
+  // So from dist/index.js, dist/public is at ./public (same directory)
+  
+  const distPublicPath = path.resolve(import.meta.dirname, "public");
   
   console.log("[serveStatic] __dirname:", import.meta.dirname);
-  console.log("[serveStatic] CWD:", process.cwd());
+  console.log("[serveStatic] Serving from:", distPublicPath);
+  console.log("[serveStatic] Path exists:", fs.existsSync(distPublicPath));
   
-  let distPublicPath: string | null = null;
-  
-  for (const testPath of possiblePaths) {
-    const exists = fs.existsSync(testPath);
-    console.log(`[serveStatic] Checking: ${testPath} - exists: ${exists}`);
-    if (exists && !distPublicPath) {
-      distPublicPath = testPath;
-    }
-  }
-  
-  if (!distPublicPath) {
-    console.error("[serveStatic] ERROR: Could not find dist/public in any location");
+  if (!fs.existsSync(distPublicPath)) {
+    console.error("[serveStatic] ERROR: dist/public not found");
     
-    // List what's in various directories for debugging
-    try {
-      console.error("[serveStatic] Listing CWD:", process.cwd());
-      console.error("[serveStatic] Files in CWD:", fs.readdirSync(process.cwd()));
-    } catch (e) {
-      console.error("[serveStatic] Could not list CWD:", e);
-    }
-    
-    try {
-      const distPath = path.resolve(process.cwd(), "dist");
-      if (fs.existsSync(distPath)) {
-        console.error("[serveStatic] Listing dist/:", fs.readdirSync(distPath));
-      } else {
-        console.error("[serveStatic] dist/ does not exist");
-      }
-    } catch (e) {
-      console.error("[serveStatic] Could not list dist/:", e);
-    }
-    
-    // Return error for all routes
-    app.get("*", (_req, res) => {
+    app.use("*", (_req, res) => {
       res.status(500).send(`
         <!DOCTYPE html>
         <html>
@@ -100,39 +69,26 @@ export function serveStatic(app: Express) {
           <body style="font-family: sans-serif; padding: 40px;">
             <h1>Build Error</h1>
             <p>The frontend build files are missing.</p>
-            <p>Checked paths:</p>
-            <ul>
-              ${possiblePaths.map(p => `<li>${p}</li>`).join('')}
-            </ul>
-            <p>CWD: ${process.cwd()}</p>
-            <p>__dirname: ${import.meta.dirname}</p>
+            <p>Expected: ${distPublicPath}</p>
           </body>
         </html>
       `);
     });
     return;
   }
-  
-  console.log("[serveStatic] Serving from:", distPublicPath);
 
-  // Serve static files
-  app.use(express.static(distPublicPath, {
-    maxAge: "1d",
-    etag: true
-  }));
+  // Serve static files (CSS, JS, images, etc.)
+  app.use(express.static(distPublicPath));
 
-  // SPA fallback - serve index.html for all non-API routes
-  app.get("*", (req, res) => {
-    // Don't interfere with API routes
+  // For ALL non-API routes, serve index.html (SPA fallback)
+  // This must be AFTER express.static
+  app.get("*", (req, res, next) => {
+    // Skip API routes
     if (req.path.startsWith("/api/")) {
-      return res.status(404).json({ error: "API endpoint not found" });
+      return next();
     }
     
-    const indexPath = path.join(distPublicPath, "index.html");
-    if (fs.existsSync(indexPath)) {
-      res.sendFile(indexPath);
-    } else {
-      res.status(500).send("index.html not found in build");
-    }
+    // Serve index.html for all other routes
+    res.sendFile(path.join(distPublicPath, "index.html"));
   });
 }
