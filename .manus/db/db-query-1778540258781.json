@@ -1,0 +1,21 @@
+{
+  "query": "SHOW COLUMNS FROM `users` LIKE 'tier';\nSELECT id, email, tier FROM `users` LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4BfoCqZAhbST9ZA.d5b78e64e9a1 --database QoCGi8ofuGbCNjSpt6gkfy --execute SHOW COLUMNS FROM `users` LIKE 'tier';\nSELECT id, email, tier FROM `users` LIMIT 5;",
+  "rows": [
+    {
+      "Field": "tier",
+      "Type": "enum('free','pro')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "free",
+      "Extra": ""
+    }
+  ],
+  "messages": [
+    "id\temail\ttier",
+    "1\tserfindah895@gmail.com\tpro"
+  ],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\ntier\tenum('free','pro')\tNO\t\tfree\t\nid\temail\ttier\n1\tserfindah895@gmail.com\tpro\n",
+  "stderr": "",
+  "execution_time_ms": 844
+}

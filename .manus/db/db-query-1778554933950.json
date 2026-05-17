@@ -1,0 +1,9 @@
+{
+  "query": "\nALTER TABLE userSettings\n  ADD COLUMN companyName VARCHAR(255) NULL,\n  ADD COLUMN companyLogoUrl VARCHAR(500) NULL,\n  ADD COLUMN hostingerApiKey VARCHAR(255) NULL,\n  ADD COLUMN priceAlertsEnabled INT NOT NULL DEFAULT 1,\n  ADD COLUMN namecheapAffiliateId VARCHAR(255) NULL,\n  ADD COLUMN godaddyAffiliateId VARCHAR(255) NULL,\n  ADD COLUMN porkbunAffiliateId VARCHAR(255) NULL,\n  ADD COLUMN hostingerAffiliateId VARCHAR(255) NULL,\n  ADD COLUMN createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4BfoCqZAhbST9ZA.d5b78e64e9a1 --database QoCGi8ofuGbCNjSpt6gkfy --execute \nALTER TABLE userSettings\n  ADD COLUMN companyName VARCHAR(255) NULL,\n  ADD COLUMN companyLogoUrl VARCHAR(500) NULL,\n  ADD COLUMN hostingerApiKey VARCHAR(255) NULL,\n  ADD COLUMN priceAlertsEnabled INT NOT NULL DEFAULT 1,\n  ADD COLUMN namecheapAffiliateId VARCHAR(255) NULL,\n  ADD COLUMN godaddyAffiliateId VARCHAR(255) NULL,\n  ADD COLUMN porkbunAffiliateId VARCHAR(255) NULL,\n  ADD COLUMN hostingerAffiliateId VARCHAR(255) NULL,\n  ADD COLUMN createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1406
+}

@@ -1,0 +1,49 @@
+{
+  "query": "SELECT id, name, email, tier, plan, subscriptionStatus, role FROM users WHERE id=1;\nSHOW TABLES;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4BfoCqZAhbST9ZA.d5b78e64e9a1 --database QoCGi8ofuGbCNjSpt6gkfy --execute SELECT id, name, email, tier, plan, subscriptionStatus, role FROM users WHERE id=1;\nSHOW TABLES;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Horace A",
+      "email": "serfindah895@gmail.com",
+      "tier": "pro",
+      "plan": "pro",
+      "subscriptionStatus": "ACTIVE",
+      "role": "admin"
+    }
+  ],
+  "messages": [
+    "Tables_in_QoCGi8ofuGbCNjSpt6gkfy",
+    "__drizzle_migrations",
+    "analysisSessions",
+    "analyzedDomains",
+    "apiKeys",
+    "cache",
+    "creditTransactions",
+    "domainComments",
+    "domainRecommendations",
+    "domainSuggestions",
+    "domains",
+    "forensicAnalysisResults",
+    "ipRateLimits",
+    "launchPlans",
+    "launchTasks",
+    "monitoringLogs",
+    "nicheAnalysis",
+    "priceAlerts",
+    "priceHistory",
+    "projectDomains",
+    "projectKeywords",
+    "pulseReports",
+    "savedComparisons",
+    "usageLog",
+    "userProjects",
+    "userSettings",
+    "users",
+    "watchlist",
+    "weeklyPulseChecks"
+  ],
+  "stdout": "id\tname\temail\ttier\tplan\tsubscriptionStatus\trole\n1\tHorace A\tserfindah895@gmail.com\tpro\tpro\tACTIVE\tadmin\nTables_in_QoCGi8ofuGbCNjSpt6gkfy\n__drizzle_migrations\nanalysisSessions\nanalyzedDomains\napiKeys\ncache\ncreditTransactions\ndomainComments\ndomainRecommendations\ndomainSuggestions\ndomains\nforensicAnalysisResults\nipRateLimits\nlaunchPlans\nlaunchTasks\nmonitoringLogs\nnicheAnalysis\npriceAlerts\npriceHistory\nprojectDomains\nprojectKeywords\npulseReports\nsavedComparisons\nusageLog\nuserProjects\nuserSettings\nusers\nwatchlist\nweeklyPulseChecks\n",
+  "stderr": "",
+  "execution_time_ms": 338
+}

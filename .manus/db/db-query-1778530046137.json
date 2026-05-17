@@ -1,0 +1,13 @@
+{
+  "query": "SHOW TABLES LIKE 'userProjects';\nSHOW TABLES LIKE 'userSettings';\nSHOW TABLES LIKE 'monitoringLogs';\nSHOW TABLES LIKE 'priceAlerts';\nSHOW TABLES LIKE 'domains';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4BfoCqZAhbST9ZA.d5b78e64e9a1 --database QoCGi8ofuGbCNjSpt6gkfy --execute SHOW TABLES LIKE 'userProjects';\nSHOW TABLES LIKE 'userSettings';\nSHOW TABLES LIKE 'monitoringLogs';\nSHOW TABLES LIKE 'priceAlerts';\nSHOW TABLES LIKE 'domains';",
+  "rows": [
+    {
+      "Tables_in_QoCGi8ofuGbCNjSpt6gkfy (userSettings)": "userSettings"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_QoCGi8ofuGbCNjSpt6gkfy (userSettings)\nuserSettings\n",
+  "stderr": "",
+  "execution_time_ms": 276
+}
