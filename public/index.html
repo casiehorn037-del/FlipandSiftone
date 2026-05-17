@@ -1,0 +1,1169 @@
+[2026-05-14 22:03] Aovebot: I understand. Let me create the complete server.js file. I'll break it into smaller parts that will work in PowerShell.
+
+First, let me delete the incomplete server.js and start fresh:
+
+Delete the incomplete file
+
+Remove-Item server.js
+
+Create the complete server.js in one command using a different method
+
+I'll use Add-Content which works better for long files
+
+Actually, PowerShell has limits with long strings. Let me try a different approach - I'll create the file using Set-Content with the complete code:
+
+Set-Content -Path "server.js" -Value 'import express from '"'"'express'"'"';
+import jwt from '"'"'jsonwebtoken'"'"';
+import bcrypt from '"'"'bcryptjs'"'"';
+import pg from '"'"'pg'"'"';
+import dotenv from '"'"'dotenv'"'"';
+import path from '"'"'path'"'"';
+import { fileURLToPath } from '"'"'url'"'"';
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const { Pool } = pg;
+
+const app = express();
+app.use(express.json());
+
+const JWT_SECRET = process.env.JWT_SECRET  '"'"'your-secret-key'"'"';
+const PORT = process.env.PORT  3000;
+
+const pool = new Pool({
+connectionString: process.env.DATABASE_URL,
+ssl: process.env.NODE_ENV === '"'"'production'"'"' ? { rejectUnauthorized: false } : false
+});
+
+async function initDb() {
+try {
+await pool.query(CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, email VARCHAR(255) UNIQUE NOT NULL, name VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP));
+await pool.query(CREATE TABLE IF NOT EXISTS domains (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, tf INTEGER, cf INTEGER, rd INTEGER, price INTEGER, category VARCHAR(100), description TEXT, available BOOLEAN DEFAULT true, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP));
+console.log('"'"'Database initialized'"'"');
+} catch (err) {
+console.error('"'"'Database init error:'"'"', err);
+}
+}
+
+const magicLinks = new Map();
+
+const authenticateToken = async (req, res, next) => {
+const authHeader = req.headers['"'"'authorization'"'"'];
+const token = authHeader && authHeader.split('"'"' '"'"')[1];
+if (!token) return res.sendStatus(401);
+try {
+const decoded = jwt.verify(token, JWT_SECRET);
+const result = await pool.query('"'"'SELECT * FROM users WHERE id = $1'"'"', [decoded.userId]);
+req.user = result.rows[0];
+next();
+} catch (err) {
+return res.sendStatus(403);
+}
+};
+
+app.get('"/api/health"', (req, res) => {
+res.json({ status: '"'"'ok'"'"', time: new Date().toISOString() });
+});
+
+app.post('"/api/auth/magic-link"', async (req, res) => {
+const { email } = req.body;
+if (!email || !email.includes('"'"'@'"'"')) {
+return res.status(400).json({ error: '"'"'Valid email required'"'"' });
+}
+const token = bcrypt.hashSync(email + Date.now(), 10);
+magicLinks.set(token, { email, expires: Date.now() + 15 * 60 * 1000 });
+const baseUrl = process.env.NODE_ENV === '"'"'production'"'"' ? '"'"'https://flipandsiftone.onrender.com (https://flipandsiftone.onrender.com/)'"'"' : http://localhost:${PORT};
+const magicLink = ${baseUrl}/api/auth/verify?token=${token};
+console.log(Magic link for ${email}: ${magicLink});
+res.json({ success: true, message: '"'"'Magic link sent'"'"', ...(process.env.NODE_ENV !== '"'"'production'"'"' && { magicLink }) });
+});
+[2026-05-14 22:04] Aovebot: app.get('"/api/auth/verify"', async (req, res) => {
+const { token } = req.query;
+const data = magicLinks.get(token);
+if (!data || Date.now() > data.expires) {
+return res.status(400).send('"'"'Invalid or expired link'"'"');
+}
+magicLinks.delete(token);
+let result = await pool.query('"'"'SELECT * FROM users WHERE email = $1'"'"', [data.email]);
+let user;
+if (result.rows.length === 0) {
+result = await pool.query('"'"'INSERT INTO users (email, name) VALUES ($1, $2) RETURNING *'"'"', [data.email, data.email.split('"'"'@'"'"')[0]]);
+user = result.rows[0];
+} else {
+user = result.rows[0];
+}
+const authToken = jwt.sign({ userId: user.id (http://user.id/) }, JWT_SECRET, { expiresIn: '"'"'7d'"'"' });
+res.redirect(/?token=${authToken});
+});
+
+app.get('"/api/auth/me"', authenticateToken, (req, res) => {
+res.json({ user: req.user });
+});
+
+app.get('"/api/domains"', async (req, res) => {
+try {
+const result = await pool.query('"'"'SELECT * FROM domains WHERE available = true ORDER BY tf DESC LIMIT 50'"'"');
+res.json({ domains: result.rows });
+} catch (err) {
+res.status(500).json({ error: '"'"'Failed to fetch domains'"'"' });
+}
+});
+
+app.post('"/api/seed"', async (req, res) => {
+const sampleDomains = [
+{ name: '"'"'wellnessvault.com (http://wellnessvault.com/)'"'"', tf: 34, cf: 28, rd: 156, price: 2500, category: '"'"'Health'"'"', description: '"'"'Premium health domain'"'"' },
+{ name: '"'"'digitalmarketingpro.com (http://digitalmarketingpro.com/)'"'"', tf: 42, cf: 35, rd: 234, price: 4500, category: '"'"'Marketing'"'"', description: '"'"'High-authority marketing domain'"'"' },
+{ name: '"'"'techreviewshub.com (http://techreviewshub.com/)'"'"', tf: 38, cf: 31, rd: 189, price: 3200, category: '"'"'Technology'"'"', description: '"'"'Tech review domain'"'"' },
+{ name: '"'"'fitnessgearhq.com (http://fitnessgearhq.com/)'"'"', tf: 29, cf: 25, rd: 98, price: 1800, category: '"'"'Fitness'"'"', description: '"'"'Fitness equipment domain'"'"' },
+{ name: '"'"'cryptoinsider.net (http://cryptoinsider.net/)'"'"', tf: 45, cf: 38, rd: 267, price: 5200, category: '"'"'Crypto'"'"', description: '"'"'Cryptocurrency authority domain'"'"' },
+{ name: '"'"'organicrecipes.com (http://organicrecipes.com/)'"'"', tf: 31, cf: 27, rd: 134, price: 2100, category: '"'"'Food'"'"', description: '"'"'Organic cooking domain'"'"' },
+{ name: '"'"'petcareguides.com (http://petcareguides.com/)'"'"', tf: 26, cf: 22, rd: 87, price: 1500, category: '"'"'Pets'"'"', description: '"'"'Pet care site'"'"' },
+{ name: '"'"'traveldealsnow.com (http://traveldealsnow.com/)'"'"', tf: 33, cf: 29, rd: 145, price: 2400, category: '"'"'Travel'"'"', description: '"'"'Travel deals domain'"'"' }
+];
+try {
+for (const domain of sampleDomains) {
+await pool.query('"'"'INSERT INTO domains (name, tf, cf, rd, price, category, description) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING'"'"', [domain.name (http://domain.name/), domain.tf (http://domain.tf/), domain.cf (http://domain.cf/), domain.rd, domain.price, domain.category, domain.description]);
+}
+res.json({ success: true, message: '"'"'Domains seeded'"'"' });
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+
+app.use(express.static('"'"'public'"'"'));
+
+app.get('"*"', (req, res) => {
+res.sendFile(path.join(__dirname, '"'"'public'"'"', '"'"'index.html'"'"'));
+});
+
+initDb().then(() => {
+app.listen(PORT, () => {
+console.log(Server running on port ${PORT});
+});
+});'
+
+Run this command and tell me if it works. This creates the complete server.js file in one command.
+[2026-05-14 22:25] Aovebot: Excellent! Now we need to create the index.html file in the public folder.
+
+Step 4: Create index.html
+
+1. In Notepad, click File → New (to create a new file)
+
+2. Copy and paste this complete HTML code:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlipAndSift - Find Profitable Expired Domains</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+min-height: 100vh;
+color: #333;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+header {
+background: white;
+padding: 20px;
+border-radius: 10px;
+margin-bottom: 30px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+h1 { color: #667eea; font-size: 2.5em; }
+.subtitle { color: #666; margin-top: 10px; }
+.auth-section {
+background: white;
+padding: 40px;
+border-radius: 10px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+max-width: 500px;
+margin: 0 auto;
+text-align: center;
+}
+.domains-section {
+background: white;
+padding: 30px;
+border-radius: 10px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+display: none;
+}
+input[type="email"] {
+width: 100%;
+padding: 15px;
+font-size: 16px;
+border: 2px solid #ddd;
+border-radius: 8px;
+margin: 20px 0;
+}
+button {
+background: #667eea;
+color: white;
+border: none;
+padding: 15px 40px;
+font-size: 16px;
+border-radius: 8px;
+cursor: pointer;
+}
+button:hover { background: #5568d3; }
+.domain-card {
+border: 1px solid #ddd;
+border-radius: 8px;
+padding: 20px;
+margin-bottom: 15px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+.domain-info h3 { color: #667eea; margin-bottom: 5px; }
+.domain-stats { display: flex; gap: 20px; margin-top: 10px; }
+.stat { text-align: center; }
+.stat-value { font-size: 1.5em; font-weight: bold; color: #667eea; }
+.stat-label { font-size: 0.8em; color: #666; }
+.price { font-size: 1.8em; font-weight: bold; color: #22c55e; }
+.logout-btn { background: #ef4444; padding: 10px 20px; font-size: 14px; }
+.logout-btn:hover { background: #dc2626; }
+.success-message {
+background: #dcfce7;
+color: #166534;
+padding: 15px;
+border-radius: 8px;
+margin-top: 20px;
+}
+.user-info {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>FlipAndSift</h1>
+<p class="subtitle">Find profitable expired domains with existing authority</p>
+</header>
+
+    <div id="authSection" class="auth-section">
+        <h2>Welcome Back</h2>
+        <p>Enter your email to receive a magic login link</p>
+        <input type="email" id="emailInput" placeholder="you@example.com" required>
+        <button onclick="sendMagicLink()">Send Magic Link</button>
+        <div id="authMessage"></div>
+[2026-05-15 12:20] Aovebot: ✅ Pushed with debug endpoint
+
+After you redeploy, please:
+
+1. Visit https://your-app-url.onrender.com/debug — this will show me the actual paths on the server
+2. Check the Render logs for the "Checking path" messages
+
+Share what the debug endpoint shows and I'll know exactly where the files are and how to fix the path.
+[2026-05-16 16:36] Aovebot: I don't have a direct way to contact Manus or their team. Here's what I can suggest:
+
+Options to Get a Public Manus Plugin
+
+1. Manus Discord/Community
+
+• Join their Discord at https://discord.gg/manus or check their community forums
+• Ask if they have plans to publish vite-plugin-manus-runtime to npm
+
+2. GitHub Issue
+
+• If you have access to their repo, open an issue requesting npm publication
+• Many devs respond to "can't deploy to Render/Vercel" use cases
+
+3. Check if Already Published
+
+• Search npm: npm search manus or check https://www.npmjs.com/search?q=manus
+• Might already exist under a different name
+
+Immediate Workaround (What We Did)
+
+The vite.config.prod.ts approach works fine — the Manus plugin is mainly for local dev features (like hot reload, dev tools, etc.). For production builds, you typically don't need it.
+
+Want me to check what the Manus plugin actually does? I can look at the vite config to see if we're losing any critical functionality in production without it.
+[2026-05-16 16:53] Aovebot: Done! Here's what I updated:
+
+Changes Made
+
+1. vite.config.ts — Added conditional plugin loading
+
+• Added getManusPlugin() async function that:
+  • Returns null if VITE_DISABLE_MANUS_RUNTIME=true
+  • Otherwise tries to import and return the Manus plugin
+• Changed defineConfig to async function
+• Manus plugin is now spread conditionally: ...(manusPlugin ? [manusPlugin] : [])
+
+2. package.json — Simplified build command
+
+• Changed from: vite build --config vite.config.prod.ts
+• To: vite build (uses default vite.config.ts)
+
+3. render.yaml — Added environment variable
+
+• Added VITE_DISABLE_MANUS_RUNTIME: "true" to env vars
+
+4. Deleted vite.config.prod.ts
+
+• No longer needed since we use a single config with env guard
+
+Result
+
+• Local Manus dev: Manus plugin loads normally (no env var set)
+• Render production: Manus plugin is skipped automatically
+
+Ready to push to GitHub and deploy!
+[2026-05-17 16:10] Aovebot: That's your GitHub profile. I need the specific repository URL for this project. It would look like:
+
+https://github.com/casiehorn037-del/flipandsift
+
+or
+
+https://github.com/casiehorn037-del/FlipandSiftone
+
+Check your GitHub repos at https://github.com/casiehorn037-del?tab=repositories and tell me the exact repo name for this project.
+[2026-05-17 16:28] Aovebot: I can only see the conversation history from this session, not files or attachments you shared in previous sessions with other agents. Each session I wake up fresh with just the context provided to me.
+
+What I can do:
+
+• Read and write files in your workspace directory (/root/.openclaw/workspace)
+• Remember things you tell me in our conversation
+• Access files you explicitly share with me in this session
+
+What I cannot do:
+
+• Access files from your local machine (like that zip file)
+• See attachments from previous conversations
+• Access files shared with other agents in other sessions
+
+For the future: If you want me to remember files or context across sessions, save them to your workspace and I'll read them from there. Or paste the content directly in our conversation.
+
+Right now, do you want me to give you the full HTML content to paste into your public/index.html file so we can finish fixing your deployment?
+[2026-05-17 16:34] Aovebot: Here's the full HTML. Copy this into your public/index.html file:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlipAndSift - Find Profitable Expired Domains</title>
+<style>
+
+• { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+min-height: 100vh;
+color: #333;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+header {
+background: white;
+padding: 20px;
+border-radius: 10px;
+margin-bottom: 30px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+h1 { color: #667eea; font-size: 2.5em; }
+.subtitle { color: #666; margin-top: 10px; }
+.auth-section {
+background: white;
+padding: 40px;
+border-radius: 10px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+max-width: 500px;
+margin: 0 auto;
+text-align: center;
+}
+.domains-section {
+background: white;
+padding: 30px;
+border-radius: 10px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+display: none;
+}
+input[type="email"] {
+width: 100%;
+padding: 15px;
+font-size: 16px;
+border: 2px solid #ddd;
+border-radius: 8px;
+margin: 20px 0;
+}
+button {
+background: #667eea;
+color: white;
+border: none;
+padding: 15px 40px;
+font-size: 16px;
+border-radius: 8px;
+cursor: pointer;
+}
+button:hover { background: #5568d3; }
+.domain-card {
+border: 1px solid #ddd;
+border-radius: 8px;
+padding: 20px;
+margin-bottom: 15px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+.domain-info h3 { color: #667eea; margin-bottom: 5px; }
+.domain-stats { display: flex; gap: 20px; margin-top: 10px; }
+.stat { text-align: center; }
+.stat-value { font-size: 1.5em; font-weight: bold; color: #667eea; }
+.stat-label { font-size: 0.8em; color: #666; }
+.price { font-size: 1.8em; font-weight: bold; color: #22c55e; }
+.logout-btn { background: #ef4444; padding: 10px 20px; font-size: 14px; }
+.logout-btn:hover { background: #dc2626; }
+.success-message {
+background: #dcfce7;
+color: #166534;
+padding: 15px;
+border-radius: 8px;
+margin-top: 20px;
+}
+.user-info {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>FlipAndSift</h1>
+<p class="subtitle">Find profitable expired domains with existing authority</p>
+</header>
+
+<div id="authSection" class="auth-section">
+<h2>Welcome Back</h2>
+<p>Enter your email to receive a magic login link</p>
+<input type="email" id="emailInput" placeholder="you@example.com" required>
+<button onclick="sendMagicLink()">Send Magic Link</button>
+<div id="authMessage"></div>
+</div>
+
+<div id="domainsSection" class="domains-section">
+<div class="user-info">
+<h2>Available Domains</h2>
+<button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+<div id="domainsList"></div>
+</div>
+</div>
+
+<script>
+const API_URL = window.location.origin;
+
+async function sendMagicLink() {
+const email = document.getElementById('emailInput').value;
+if (!email || !email.includes('@')) {
+alert('Please enter a valid email');
+return;
+}
+
+try {
+const res = await fetch(${API_URL}/api/auth/magic-link, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ email })
+});
+const data = await res.json();
+if (data.success) {
+document.getElementById('authMessage').innerHTML =
+'<div class="success-message">Check your email for the magic link!</div>';
+}
+} catch (err) {
+alert('Error sending magic link');
+}
+}
+
+async function loadDomains() {
+const token = localStorage.getItem('token');
+if (!token) return;
+
+try {
+[2026-05-17 16:38] Aovebot: Here's the full HTML. Copy all of this:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlipAndSift - Find Profitable Expired Domains</title>
+<style>
+
+• { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+min-height: 100vh;
+color: #333;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+header {
+background: white;
+padding: 20px;
+border-radius: 10px;
+margin-bottom: 30px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+h1 { color: #667eea; font-size: 2.5em; }
+.subtitle { color: #666; margin-top: 10px; }
+.auth-section {
+background: white;
+padding: 40px;
+border-radius: 10px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+max-width: 500px;
+margin: 0 auto;
+text-align: center;
+}
+.domains-section {
+background: white;
+padding: 30px;
+border-radius: 10px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+display: none;
+}
+input[type="email"] {
+width: 100%;
+padding: 15px;
+font-size: 16px;
+border: 2px solid #ddd;
+border-radius: 8px;
+margin: 20px 0;
+}
+button {
+background: #667eea;
+color: white;
+border: none;
+padding: 15px 40px;
+font-size: 16px;
+border-radius: 8px;
+cursor: pointer;
+}
+button:hover { background: #5568d3; }
+.domain-card {
+border: 1px solid #ddd;
+border-radius: 8px;
+padding: 20px;
+margin-bottom: 15px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+.domain-info h3 { color: #667eea; margin-bottom: 5px; }
+.domain-stats { display: flex; gap: 20px; margin-top: 10px; }
+.stat { text-align: center; }
+.stat-value { font-size: 1.5em; font-weight: bold; color: #667eea; }
+.stat-label { font-size: 0.8em; color: #666; }
+.price { font-size: 1.8em; font-weight: bold; color: #22c55e; }
+.logout-btn { background: #ef4444; padding: 10px 20px; font-size: 14px; }
+.logout-btn:hover { background: #dc2626; }
+.success-message {
+background: #dcfce7;
+color: #166534;
+padding: 15px;
+border-radius: 8px;
+margin-top: 20px;
+}
+.user-info {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>FlipAndSift</h1>
+<p class="subtitle">Find profitable expired domains with existing authority</p>
+</header>
+
+<div id="authSection" class="auth-section">
+<h2>Welcome Back</h2>
+<p>Enter your email to receive a magic login link</p>
+<input type="email" id="emailInput" placeholder="you@example.com" required>
+<button onclick="sendMagicLink()">Send Magic Link</button>
+<div id="authMessage"></div>
+</div>
+
+<div id="domainsSection" class="domains-section">
+<div class="user-info">
+<h2>Available Domains</h2>
+<button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+<div id="domainsList"></div>
+</div>
+</div>
+
+<script>
+const API_URL = window.location.origin;
+
+async function sendMagicLink() {
+const email = document.getElementById('emailInput').value;
+if (!email || !email.includes('@')) {
+alert('Please enter a valid email');
+return;
+}
+
+try {
+const res = await fetch(${API_URL}/api/auth/magic-link, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ email })
+});
+const data = await res.json();
+if (data.success) {
+document.getElementById('authMessage').innerHTML =
+'<div class="success-message">Check your email for the magic link!</div>';
+}
+} catch (err) {
+alert('Error sending magic link');
+}
+}
+
+async function loadDomains() {
+const token = localStorage.getItem('token');
+if (!token) return;
+
+try {
+const res = await fetch(${API_URL}/api/domains, {
+headers: { 'Authorization': Bearer ${token} }
+});
+[2026-05-14 22:03] Aovebot: I understand. Let me create the complete server.js file. I'll break it into smaller parts that will work in PowerShell.
+
+First, let me delete the incomplete server.js and start fresh:
+
+Delete the incomplete file
+
+Remove-Item server.js
+
+Create the complete server.js in one command using a different method
+
+I'll use Add-Content which works better for long files
+
+Actually, PowerShell has limits with long strings. Let me try a different approach - I'll create the file using Set-Content with the complete code:
+
+Set-Content -Path "server.js" -Value 'import express from '"'"'express'"'"';
+import jwt from '"'"'jsonwebtoken'"'"';
+import bcrypt from '"'"'bcryptjs'"'"';
+import pg from '"'"'pg'"'"';
+import dotenv from '"'"'dotenv'"'"';
+import path from '"'"'path'"'"';
+import { fileURLToPath } from '"'"'url'"'"';
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const { Pool } = pg;
+
+const app = express();
+app.use(express.json());
+
+const JWT_SECRET = process.env.JWT_SECRET  '"'"'your-secret-key'"'"';
+const PORT = process.env.PORT  3000;
+
+const pool = new Pool({
+connectionString: process.env.DATABASE_URL,
+ssl: process.env.NODE_ENV === '"'"'production'"'"' ? { rejectUnauthorized: false } : false
+});
+
+async function initDb() {
+try {
+await pool.query(CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, email VARCHAR(255) UNIQUE NOT NULL, name VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP));
+await pool.query(CREATE TABLE IF NOT EXISTS domains (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, tf INTEGER, cf INTEGER, rd INTEGER, price INTEGER, category VARCHAR(100), description TEXT, available BOOLEAN DEFAULT true, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP));
+console.log('"'"'Database initialized'"'"');
+} catch (err) {
+console.error('"'"'Database init error:'"'"', err);
+}
+}
+
+const magicLinks = new Map();
+
+const authenticateToken = async (req, res, next) => {
+const authHeader = req.headers['"'"'authorization'"'"'];
+const token = authHeader && authHeader.split('"'"' '"'"')[1];
+if (!token) return res.sendStatus(401);
+try {
+const decoded = jwt.verify(token, JWT_SECRET);
+const result = await pool.query('"'"'SELECT * FROM users WHERE id = $1'"'"', [decoded.userId]);
+req.user = result.rows[0];
+next();
+} catch (err) {
+return res.sendStatus(403);
+}
+};
+
+app.get('"/api/health"', (req, res) => {
+res.json({ status: '"'"'ok'"'"', time: new Date().toISOString() });
+});
+
+app.post('"/api/auth/magic-link"', async (req, res) => {
+const { email } = req.body;
+if (!email || !email.includes('"'"'@'"'"')) {
+return res.status(400).json({ error: '"'"'Valid email required'"'"' });
+}
+const token = bcrypt.hashSync(email + Date.now(), 10);
+magicLinks.set(token, { email, expires: Date.now() + 15 * 60 * 1000 });
+const baseUrl = process.env.NODE_ENV === '"'"'production'"'"' ? '"'"'https://flipandsiftone.onrender.com (https://flipandsiftone.onrender.com/)'"'"' : http://localhost:${PORT};
+const magicLink = ${baseUrl}/api/auth/verify?token=${token};
+console.log(Magic link for ${email}: ${magicLink});
+res.json({ success: true, message: '"'"'Magic link sent'"'"', ...(process.env.NODE_ENV !== '"'"'production'"'"' && { magicLink }) });
+});
+[2026-05-14 22:04] Aovebot: app.get('"/api/auth/verify"', async (req, res) => {
+const { token } = req.query;
+const data = magicLinks.get(token);
+if (!data || Date.now() > data.expires) {
+return res.status(400).send('"'"'Invalid or expired link'"'"');
+}
+magicLinks.delete(token);
+let result = await pool.query('"'"'SELECT * FROM users WHERE email = $1'"'"', [data.email]);
+let user;
+if (result.rows.length === 0) {
+result = await pool.query('"'"'INSERT INTO users (email, name) VALUES ($1, $2) RETURNING *'"'"', [data.email, data.email.split('"'"'@'"'"')[0]]);
+user = result.rows[0];
+} else {
+user = result.rows[0];
+}
+const authToken = jwt.sign({ userId: user.id (http://user.id/) }, JWT_SECRET, { expiresIn: '"'"'7d'"'"' });
+res.redirect(/?token=${authToken});
+});
+
+app.get('"/api/auth/me"', authenticateToken, (req, res) => {
+res.json({ user: req.user });
+});
+
+app.get('"/api/domains"', async (req, res) => {
+try {
+const result = await pool.query('"'"'SELECT * FROM domains WHERE available = true ORDER BY tf DESC LIMIT 50'"'"');
+res.json({ domains: result.rows });
+} catch (err) {
+res.status(500).json({ error: '"'"'Failed to fetch domains'"'"' });
+}
+});
+
+app.post('"/api/seed"', async (req, res) => {
+const sampleDomains = [
+{ name: '"'"'wellnessvault.com (http://wellnessvault.com/)'"'"', tf: 34, cf: 28, rd: 156, price: 2500, category: '"'"'Health'"'"', description: '"'"'Premium health domain'"'"' },
+{ name: '"'"'digitalmarketingpro.com (http://digitalmarketingpro.com/)'"'"', tf: 42, cf: 35, rd: 234, price: 4500, category: '"'"'Marketing'"'"', description: '"'"'High-authority marketing domain'"'"' },
+{ name: '"'"'techreviewshub.com (http://techreviewshub.com/)'"'"', tf: 38, cf: 31, rd: 189, price: 3200, category: '"'"'Technology'"'"', description: '"'"'Tech review domain'"'"' },
+{ name: '"'"'fitnessgearhq.com (http://fitnessgearhq.com/)'"'"', tf: 29, cf: 25, rd: 98, price: 1800, category: '"'"'Fitness'"'"', description: '"'"'Fitness equipment domain'"'"' },
+{ name: '"'"'cryptoinsider.net (http://cryptoinsider.net/)'"'"', tf: 45, cf: 38, rd: 267, price: 5200, category: '"'"'Crypto'"'"', description: '"'"'Cryptocurrency authority domain'"'"' },
+{ name: '"'"'organicrecipes.com (http://organicrecipes.com/)'"'"', tf: 31, cf: 27, rd: 134, price: 2100, category: '"'"'Food'"'"', description: '"'"'Organic cooking domain'"'"' },
+{ name: '"'"'petcareguides.com (http://petcareguides.com/)'"'"', tf: 26, cf: 22, rd: 87, price: 1500, category: '"'"'Pets'"'"', description: '"'"'Pet care site'"'"' },
+{ name: '"'"'traveldealsnow.com (http://traveldealsnow.com/)'"'"', tf: 33, cf: 29, rd: 145, price: 2400, category: '"'"'Travel'"'"', description: '"'"'Travel deals domain'"'"' }
+];
+try {
+for (const domain of sampleDomains) {
+await pool.query('"'"'INSERT INTO domains (name, tf, cf, rd, price, category, description) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING'"'"', [domain.name (http://domain.name/), domain.tf (http://domain.tf/), domain.cf (http://domain.cf/), domain.rd, domain.price, domain.category, domain.description]);
+}
+res.json({ success: true, message: '"'"'Domains seeded'"'"' });
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+
+app.use(express.static('"'"'public'"'"'));
+
+app.get('"*"', (req, res) => {
+res.sendFile(path.join(__dirname, '"'"'public'"'"', '"'"'index.html'"'"'));
+});
+
+initDb().then(() => {
+app.listen(PORT, () => {
+console.log(Server running on port ${PORT});
+});
+});'
+
+Run this command and tell me if it works. This creates the complete server.js file in one command.
+[2026-05-14 22:25] Aovebot: Excellent! Now we need to create the index.html file in the public folder.
+
+Step 4: Create index.html
+
+1. In Notepad, click File → New (to create a new file)
+
+2. Copy and paste this complete HTML code:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlipAndSift - Find Profitable Expired Domains</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+min-height: 100vh;
+color: #333;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+header {
+background: white;
+padding: 20px;
+border-radius: 10px;
+margin-bottom: 30px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+h1 { color: #667eea; font-size: 2.5em; }
+.subtitle { color: #666; margin-top: 10px; }
+.auth-section {
+background: white;
+padding: 40px;
+border-radius: 10px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+max-width: 500px;
+margin: 0 auto;
+text-align: center;
+}
+.domains-section {
+background: white;
+padding: 30px;
+border-radius: 10px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+display: none;
+}
+input[type="email"] {
+width: 100%;
+padding: 15px;
+font-size: 16px;
+border: 2px solid #ddd;
+border-radius: 8px;
+margin: 20px 0;
+}
+button {
+background: #667eea;
+color: white;
+border: none;
+padding: 15px 40px;
+font-size: 16px;
+border-radius: 8px;
+cursor: pointer;
+}
+button:hover { background: #5568d3; }
+.domain-card {
+border: 1px solid #ddd;
+border-radius: 8px;
+padding: 20px;
+margin-bottom: 15px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+.domain-info h3 { color: #667eea; margin-bottom: 5px; }
+.domain-stats { display: flex; gap: 20px; margin-top: 10px; }
+.stat { text-align: center; }
+.stat-value { font-size: 1.5em; font-weight: bold; color: #667eea; }
+.stat-label { font-size: 0.8em; color: #666; }
+.price { font-size: 1.8em; font-weight: bold; color: #22c55e; }
+.logout-btn { background: #ef4444; padding: 10px 20px; font-size: 14px; }
+.logout-btn:hover { background: #dc2626; }
+.success-message {
+background: #dcfce7;
+color: #166534;
+padding: 15px;
+border-radius: 8px;
+margin-top: 20px;
+}
+.user-info {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>FlipAndSift</h1>
+<p class="subtitle">Find profitable expired domains with existing authority</p>
+</header>
+
+    <div id="authSection" class="auth-section">
+        <h2>Welcome Back</h2>
+        <p>Enter your email to receive a magic login link</p>
+        <input type="email" id="emailInput" placeholder="you@example.com" required>
+        <button onclick="sendMagicLink()">Send Magic Link</button>
+        <div id="authMessage"></div>
+[2026-05-15 12:20] Aovebot: ✅ Pushed with debug endpoint
+
+After you redeploy, please:
+
+1. Visit https://your-app-url.onrender.com/debug — this will show me the actual paths on the server
+2. Check the Render logs for the "Checking path" messages
+
+Share what the debug endpoint shows and I'll know exactly where the files are and how to fix the path.
+[2026-05-16 16:36] Aovebot: I don't have a direct way to contact Manus or their team. Here's what I can suggest:
+
+Options to Get a Public Manus Plugin
+
+1. Manus Discord/Community
+
+• Join their Discord at https://discord.gg/manus or check their community forums
+• Ask if they have plans to publish vite-plugin-manus-runtime to npm
+
+2. GitHub Issue
+
+• If you have access to their repo, open an issue requesting npm publication
+• Many devs respond to "can't deploy to Render/Vercel" use cases
+
+3. Check if Already Published
+
+• Search npm: npm search manus or check https://www.npmjs.com/search?q=manus
+• Might already exist under a different name
+
+Immediate Workaround (What We Did)
+
+The vite.config.prod.ts approach works fine — the Manus plugin is mainly for local dev features (like hot reload, dev tools, etc.). For production builds, you typically don't need it.
+
+Want me to check what the Manus plugin actually does? I can look at the vite config to see if we're losing any critical functionality in production without it.
+[2026-05-16 16:53] Aovebot: Done! Here's what I updated:
+
+Changes Made
+
+1. vite.config.ts — Added conditional plugin loading
+
+• Added getManusPlugin() async function that:
+  • Returns null if VITE_DISABLE_MANUS_RUNTIME=true
+  • Otherwise tries to import and return the Manus plugin
+• Changed defineConfig to async function
+• Manus plugin is now spread conditionally: ...(manusPlugin ? [manusPlugin] : [])
+
+2. package.json — Simplified build command
+
+• Changed from: vite build --config vite.config.prod.ts
+• To: vite build (uses default vite.config.ts)
+
+3. render.yaml — Added environment variable
+
+• Added VITE_DISABLE_MANUS_RUNTIME: "true" to env vars
+
+4. Deleted vite.config.prod.ts
+
+• No longer needed since we use a single config with env guard
+
+Result
+
+• Local Manus dev: Manus plugin loads normally (no env var set)
+• Render production: Manus plugin is skipped automatically
+
+Ready to push to GitHub and deploy!
+[2026-05-17 16:10] Aovebot: That's your GitHub profile. I need the specific repository URL for this project. It would look like:
+
+https://github.com/casiehorn037-del/flipandsift
+
+or
+
+https://github.com/casiehorn037-del/FlipandSiftone
+
+Check your GitHub repos at https://github.com/casiehorn037-del?tab=repositories and tell me the exact repo name for this project.
+[2026-05-17 16:28] Aovebot: I can only see the conversation history from this session, not files or attachments you shared in previous sessions with other agents. Each session I wake up fresh with just the context provided to me.
+
+What I can do:
+
+• Read and write files in your workspace directory (/root/.openclaw/workspace)
+• Remember things you tell me in our conversation
+• Access files you explicitly share with me in this session
+
+What I cannot do:
+
+• Access files from your local machine (like that zip file)
+• See attachments from previous conversations
+• Access files shared with other agents in other sessions
+
+For the future: If you want me to remember files or context across sessions, save them to your workspace and I'll read them from there. Or paste the content directly in our conversation.
+
+Right now, do you want me to give you the full HTML content to paste into your public/index.html file so we can finish fixing your deployment?
+[2026-05-17 16:34] Aovebot: Here's the full HTML. Copy this into your public/index.html file:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlipAndSift - Find Profitable Expired Domains</title>
+<style>
+
+• { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+min-height: 100vh;
+color: #333;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+header {
+background: white;
+padding: 20px;
+border-radius: 10px;
+margin-bottom: 30px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+h1 { color: #667eea; font-size: 2.5em; }
+.subtitle { color: #666; margin-top: 10px; }
+.auth-section {
+background: white;
+padding: 40px;
+border-radius: 10px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+max-width: 500px;
+margin: 0 auto;
+text-align: center;
+}
+.domains-section {
+background: white;
+padding: 30px;
+border-radius: 10px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+display: none;
+}
+input[type="email"] {
+width: 100%;
+padding: 15px;
+font-size: 16px;
+border: 2px solid #ddd;
+border-radius: 8px;
+margin: 20px 0;
+}
+button {
+background: #667eea;
+color: white;
+border: none;
+padding: 15px 40px;
+font-size: 16px;
+border-radius: 8px;
+cursor: pointer;
+}
+button:hover { background: #5568d3; }
+.domain-card {
+border: 1px solid #ddd;
+border-radius: 8px;
+padding: 20px;
+margin-bottom: 15px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+.domain-info h3 { color: #667eea; margin-bottom: 5px; }
+.domain-stats { display: flex; gap: 20px; margin-top: 10px; }
+.stat { text-align: center; }
+.stat-value { font-size: 1.5em; font-weight: bold; color: #667eea; }
+.stat-label { font-size: 0.8em; color: #666; }
+.price { font-size: 1.8em; font-weight: bold; color: #22c55e; }
+.logout-btn { background: #ef4444; padding: 10px 20px; font-size: 14px; }
+.logout-btn:hover { background: #dc2626; }
+.success-message {
+background: #dcfce7;
+color: #166534;
+padding: 15px;
+border-radius: 8px;
+margin-top: 20px;
+}
+.user-info {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>FlipAndSift</h1>
+<p class="subtitle">Find profitable expired domains with existing authority</p>
+</header>
+
+<div id="authSection" class="auth-section">
+<h2>Welcome Back</h2>
+<p>Enter your email to receive a magic login link</p>
+<input type="email" id="emailInput" placeholder="you@example.com" required>
+<button onclick="sendMagicLink()">Send Magic Link</button>
+<div id="authMessage"></div>
+</div>
+
+<div id="domainsSection" class="domains-section">
+<div class="user-info">
+<h2>Available Domains</h2>
+<button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+<div id="domainsList"></div>
+</div>
+</div>
+
+<script>
+const API_URL = window.location.origin;
+
+async function sendMagicLink() {
+const email = document.getElementById('emailInput').value;
+if (!email || !email.includes('@')) {
+alert('Please enter a valid email');
+return;
+}
+
+try {
+const res = await fetch(${API_URL}/api/auth/magic-link, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ email })
+});
+const data = await res.json();
+if (data.success) {
+document.getElementById('authMessage').innerHTML =
+'<div class="success-message">Check your email for the magic link!</div>';
+}
+} catch (err) {
+alert('Error sending magic link');
+}
+}
+
+async function loadDomains() {
+const token = localStorage.getItem('token');
+if (!token) return;
+
+try {
+[2026-05-17 16:39] Aovebot: const data = await res.json();
+
+const list = document.getElementById('domainsList');list.innerHTML = data.domains.map(d => <div class="domain-card"> <div class="domain-info"> <h3>${d.name}</h3> <p>${d.description}</p> <div class="domain-stats"> <div class="stat"> <div class="stat-value">${d.tf}</div> <div class="stat-label">TF</div> </div> <div class="stat"> <div class="stat-value">${d.cf}</div> <div class="stat-label">CF</div> </div> <div class="stat"> <div class="stat-value">${d.rd}</div> <div class="stat-label">RD</div> </div> </div> </div> <div class="price">$${d.price}</div> </div>).join('');
+} catch (err) {
+console.error('Error loading domains');
+}
+}
+
+function logout() {
+localStorage.removeItem('token');
+document.getElementById('authSection').style.display = 'block';
+document.getElementById('domainsSection').style.display = 'none';
+}
+
+// Check for token in URL (from magic link)
+const urlParams = new URLSearchParams(window.location.search);
+const token = urlParams.get('token');
+if (token) {
+localStorage.setItem('token', token);
+window.history.replaceState({}, '', '/');
+document.getElementById('authSection').style.display = 'none';
+document.getElementById('domainsSection').style.display = 'block';
+loadDomains();
+}
+</script>
+</body>
+</html>
+
