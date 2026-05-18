@@ -927,6 +927,55 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    register: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string().min(6),
+        name: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const bcrypt = await import("bcryptjs");
+        const existingUser = await db.getUserByEmail(input.email);
+        if (existingUser) {
+          throw new TRPCError({ code: "CONFLICT", message: "An account with this email already exists" });
+        }
+        const passwordHash = await bcrypt.hash(input.password, 12);
+        const userId = await db.createEmailUser({
+          email: input.email,
+          name: input.name || null,
+          passwordHash,
+        });
+        return { success: true, userId };
+      }),
+    login: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const bcrypt = await import("bcryptjs");
+        const user = await db.getUserByEmail(input.email);
+        if (!user || !user.passwordHash) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+        }
+        const valid = await bcrypt.compare(input.password, user.passwordHash);
+        if (!valid) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+        }
+        // Update last signed in
+        await db.upsertUser({
+          openId: user.openId || `email_${user.id}`,
+          lastSignedIn: new Date(),
+        });
+        // Create and set session cookie
+        const { createEmailSessionToken } = await import("./_core/emailAuth");
+        const { getSessionCookieOptions } = await import("./_core/cookies");
+        const { COOKIE_NAME, ONE_YEAR_MS } = await import("@shared/const");
+        const sessionToken = await createEmailSessionToken(user.id, user.email || input.email, user.name);
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        return { success: true, user: { id: user.id, email: user.email, name: user.name } };
+      }),
   }),
 
   domains: router({

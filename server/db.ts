@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
   users, 
+  CreateUserInput,
   domains,
   InsertDomain,
   priceAlerts,
@@ -119,6 +120,41 @@ export async function getUserByOpenId(openId: string) {
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
 
   return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get user: database not available");
+    return undefined;
+  }
+
+  const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createEmailUser(input: CreateUserInput): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(users).values({
+    email: input.email,
+    name: input.name || null,
+    passwordHash: input.passwordHash,
+    openId: null,
+    loginMethod: "email",
+    role: "user",
+    plan: "free",
+    tier: "free",
+    credits: 0,
+    analysisCount: 0,
+    lastResetDate: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    lastSignedIn: new Date(),
+  });
+
+  return Number((result as any).insertId);
 }
 
 // Domain management functions

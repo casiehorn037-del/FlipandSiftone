@@ -11,8 +11,10 @@ export const users = mysqlTable("users", {
    * Use this for relations between tables.
    */
   id: int("id").autoincrement().primaryKey(),
-  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
-  openId: varchar("openId", { length: 64 }).notNull().unique(),
+  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. Null for email/password users. */
+  openId: varchar("openId", { length: 64 }).unique(),
+  /** Bcrypt hashed password for email/password auth. Null for OAuth users. */
+  passwordHash: varchar("passwordHash", { length: 255 }),
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
@@ -33,6 +35,13 @@ export const users = mysqlTable("users", {
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+
+// Helper type for creating users with passwords
+export type CreateUserInput = {
+  email: string;
+  name?: string | null;
+  passwordHash: string;
+};
 
 /**
  * Domains table for storing domain information and current prices

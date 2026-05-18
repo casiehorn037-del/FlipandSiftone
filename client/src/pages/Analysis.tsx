@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import {
   Upload,
@@ -25,6 +27,8 @@ import {
   Target,
   Flame,
   Trophy,
+  FileText,
+  Search,
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
@@ -34,6 +38,21 @@ import { CooldownTimer } from "@/components/CooldownTimer";
 
 type IntakeGoal = "money_site" | "301_redirect" | "pbn";
 type IntakeRisk = "premium" | "high_power";
+type InputMode = "image" | "text";
+
+function parseDomainList(input: string): string[] {
+  // Split by newlines, commas, or spaces
+  const domains = input
+    .split(/[\n,\s]+/)
+    .map((d) => d.trim().toLowerCase())
+    .filter((d) => {
+      if (!d) return false;
+      // Basic domain validation: must contain a dot and valid chars
+      return /^[a-z0-9][a-z0-9\-\.]*\.[a-z]{2,}$/i.test(d);
+    });
+  // Deduplicate
+  return Array.from(new Set(domains));
+}
 
 export default function Analysis() {
   const { user, loading: authLoading } = useAuth();
@@ -45,6 +64,12 @@ export default function Analysis() {
   const [nextAvailableAt, setNextAvailableAt] = useState<Date | undefined>();
   const [showCooldownTimer, setShowCooldownTimer] = useState(false);
   const [enOnly, setEnOnly] = useState(false);
+
+  // Text input state
+  const [inputMode, setInputMode] = useState<InputMode>("image");
+  const [domainText, setDomainText] = useState("");
+  const [textResults, setTextResults] = useState<{ domain: string; available: boolean; registrar?: string; error?: string }[] | null>(null);
+  const [textChecking, setTextChecking] = useState(false);
 
   // Intake form state
   const [intakeStep, setIntakeStep] = useState<"intake" | "upload">("intake");
@@ -72,6 +97,11 @@ export default function Analysis() {
     },
   });
 
+  const checkBulk = trpc.domainAvailability.checkBulk.useQuery(
+    { domains: parseDomainList(domainText) },
+    { enabled: false }
+  );
+
   const { data: recommendations, isLoading: loadingRecommendations } = trpc.analysis.getRecommendations.useQuery(
     { sessionId: sessionId! },
     { enabled: !!sessionId }
@@ -96,6 +126,32 @@ export default function Analysis() {
       intakeNiche: intakeNiche || undefined,
       intakeRiskTolerance: intakeRisk ?? undefined,
     });
+  };
+
+  const handleTextCheck = async () => {
+    const domains = parseDomainList(domainText);
+    if (domains.length === 0) {
+      toast.error("No valid domains found. Enter domains like example.com, one per line or comma-separated.");
+      return;
+    }
+    if (domains.length > 50) {
+      toast.error("Maximum 50 domains at a time.");
+      return;
+    }
+    setTextChecking(true);
+    setTextResults(null);
+    try {
+      const result = await checkBulk.refetch();
+      if (result.data) {
+        setTextResults(result.data);
+        const availableCount = result.data.filter((r) => r.available).length;
+        toast.success(`Checked ${result.data.length} domains. ${availableCount} available.`);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to check domains");
+    } finally {
+      setTextChecking(false);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); };
@@ -153,7 +209,7 @@ export default function Analysis() {
             <Sparkles className="w-8 h-8 text-primary" />
             Domain Analysis
           </h1>
-          <p className="text-muted-foreground text-lg">Upload a SpamZilla screenshot and let your veteran Domain Strategist find the perfect expired domain</p>
+          <p className="text-muted-foreground text-lg">Upload a SpamZilla screenshot or paste a list of domains to check availability</p>
         </div>
 
         {showCooldownTimer && nextAvailableAt && (
@@ -234,14 +290,14 @@ export default function Analysis() {
                 className="w-full"
                 size="lg"
               >
-                Continue to Upload
+                Continue
                 <Sparkles className="w-4 h-4 ml-2" />
               </Button>
             </CardContent>
           </Card>
         )}
 
-        {/* PHASE 2: UPLOAD */}
+        {/* PHASE 2: UPLOAD / TEXT INPUT */}
         {intakeStep === "upload" && (
           <>
             {/* Intake Summary Banner */}
@@ -254,41 +310,143 @@ export default function Analysis() {
               <Button variant="ghost" size="sm" onClick={() => setIntakeStep("intake")}>Edit</Button>
             </div>
 
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>Upload SpamZilla Screenshot</CardTitle>
-                <CardDescription>Upload a screenshot from SpamZilla or any expired domain marketplace</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div
-                  className="border-2 border-dashed rounded-lg p-12 text-center cursor-pointer hover:border-primary transition-colors"
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
-                  {imagePreview ? (
-                    <div className="space-y-4">
-                      <img src={imagePreview} alt="Preview" className="max-h-64 mx-auto rounded border" />
-                      <p className="text-sm text-muted-foreground">{selectedImage?.name}</p>
+            <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as InputMode)} className="mb-8">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="image" className="gap-2">
+                  <Upload className="w-4 h-4" /> Screenshot Upload
+                </TabsTrigger>
+                <TabsTrigger value="text" className="gap-2">
+                  <FileText className="w-4 h-4" /> Text Input
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="image">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Upload SpamZilla Screenshot</CardTitle>
+                    <CardDescription>Upload a screenshot from SpamZilla or any expired domain marketplace</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div
+                      className="border-2 border-dashed rounded-lg p-12 text-center cursor-pointer hover:border-primary transition-colors"
+                      onDragOver={handleDragOver}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+                      {imagePreview ? (
+                        <div className="space-y-4">
+                          <img src={imagePreview} alt="Preview" className="max-h-64 mx-auto rounded border" />
+                          <p className="text-sm text-muted-foreground">{selectedImage?.name}</p>
+                        </div>
+                      ) : (
+                        <>
+                          <Upload className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                          <p className="text-lg font-medium mb-2">Drop your screenshot here</p>
+                          <p className="text-sm text-muted-foreground">or click to browse</p>
+                        </>
+                      )}
                     </div>
-                  ) : (
-                    <>
-                      <Upload className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                      <p className="text-lg font-medium mb-2">Drop your screenshot here</p>
-                      <p className="text-sm text-muted-foreground">or click to browse</p>
-                    </>
-                  )}
-                </div>
-                <Button onClick={handleAnalyze} disabled={!selectedImage || createSession.isPending} className="w-full" size="lg">
-                  {createSession.isPending ? (
-                    <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Analyzing Domains...</>
-                  ) : (
-                    <><Sparkles className="w-5 h-5 mr-2" />Analyze Domains</>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
+                    <Button onClick={handleAnalyze} disabled={!selectedImage || createSession.isPending} className="w-full" size="lg">
+                      {createSession.isPending ? (
+                        <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Analyzing Domains...</>
+                      ) : (
+                        <><Sparkles className="w-5 h-5 mr-2" />Analyze Domains</>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="text">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Paste Domain List</CardTitle>
+                    <CardDescription>Enter domains one per line or comma-separated. We'll check availability via WHOIS lookup.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Textarea
+                      placeholder={`example.com\nmydomain.net\nflipandsift.io\n...`}
+                      value={domainText}
+                      onChange={(e) => setDomainText(e.target.value)}
+                      rows={8}
+                      className="font-mono text-sm"
+                    />
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>{parseDomainList(domainText).length} valid domain(s)</span>
+                      <span>Max 50 domains</span>
+                    </div>
+                    <Button
+                      onClick={handleTextCheck}
+                      disabled={parseDomainList(domainText).length === 0 || textChecking}
+                      className="w-full"
+                      size="lg"
+                    >
+                      {textChecking ? (
+                        <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Checking Availability...</>
+                      ) : (
+                        <><Search className="w-5 h-5 mr-2" />Check Availability</>
+                      )}
+                    </Button>
+
+                    {/* Text Results */}
+                    {textResults && textResults.length > 0 && (
+                      <div className="mt-6 space-y-2">
+                        <h3 className="font-semibold text-sm">Results</h3>
+                        <div className="border rounded-lg overflow-hidden">
+                          <table className="w-full text-sm">
+                            <thead className="bg-muted">
+                              <tr>
+                                <th className="text-left px-4 py-2 font-medium">Domain</th>
+                                <th className="text-left px-4 py-2 font-medium">Status</th>
+                                <th className="text-left px-4 py-2 font-medium">Registrar</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {textResults.map((r) => (
+                                <tr key={r.domain} className="border-t">
+                                  <td className="px-4 py-2 font-mono">{r.domain}</td>
+                                  <td className="px-4 py-2">
+                                    {r.error ? (
+                                      <Badge variant="outline" className="text-amber-600">Error</Badge>
+                                    ) : r.available ? (
+                                      <Badge className="bg-green-100 text-green-800 border-green-300 gap-1">
+                                        <CheckCircle2 className="w-3 h-3" /> Available
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="secondary" className="gap-1">
+                                        <AlertCircle className="w-3 h-3" /> Taken
+                                      </Badge>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-2 text-muted-foreground">{r.registrar || "—"}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                          <Badge variant="outline" className="gap-1">
+                            <CheckCircle2 className="w-3 h-3 text-green-600" />
+                            {textResults.filter((r) => r.available).length} Available
+                          </Badge>
+                          <Badge variant="outline" className="gap-1">
+                            <AlertCircle className="w-3 h-3 text-muted-foreground" />
+                            {textResults.filter((r) => !r.available && !r.error).length} Taken
+                          </Badge>
+                          {textResults.some((r) => r.error) && (
+                            <Badge variant="outline" className="gap-1">
+                              <TriangleAlert className="w-3 h-3 text-amber-600" />
+                              {textResults.filter((r) => r.error).length} Errors
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </>
         )}
 
