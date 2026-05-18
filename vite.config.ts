@@ -4,7 +4,20 @@ import react from "@vitejs/plugin-react";
 import fs from "node:fs";
 import path from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
-import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
+import type { Plugin as VitePlugin } from "vite";
+
+// Conditionally load Manus runtime plugin (disabled in production/CI)
+async function getManusPlugin(): Promise<VitePlugin | null> {
+  if (process.env.VITE_DISABLE_MANUS_RUNTIME === "true") {
+    return null;
+  }
+  try {
+    const { vitePluginManusRuntime } = await import("vite-plugin-manus-runtime");
+    return vitePluginManusRuntime();
+  } catch {
+    return null;
+  }
+}
 
 // =============================================================================
 // Manus Debug Collector - Vite Plugin
@@ -150,9 +163,17 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+export default defineConfig(async () => {
+  const manusPlugin = await getManusPlugin();
+  const plugins = [
+    react(),
+    tailwindcss(),
+    jsxLocPlugin(),
+    ...(manusPlugin ? [manusPlugin] : []),
+    vitePluginManusDebugCollector(),
+  ];
 
-export default defineConfig({
+  return {
   plugins,
   resolve: {
     alias: {
@@ -184,4 +205,5 @@ export default defineConfig({
       deny: ["**/.*"],
     },
   },
+};
 });

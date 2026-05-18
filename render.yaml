@@ -51,5 +51,7 @@ services:
         generateValue: true
       - key: VITE_APP_TITLE
         value: FlipandSift
+      - key: VITE_DISABLE_MANUS_RUNTIME
+        value: "true"
       - key: PORT
         value: 10000
