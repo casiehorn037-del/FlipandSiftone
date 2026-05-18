@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlipAndSift — Do You Make These Mistakes in Domain Flipping?</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background: #fff;
+  color: #222;
+  line-height: 1.6;
+}
+.container { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+
+/* Sackheim-style headline */
+.headline-area {
+  text-align: center;
+  padding: 60px 20px 40px;
+  background: linear-gradient(180deg, #f8f9fa 0%, #fff 100%);
+}
+.headline {
+  font-size: 2.8em;
+  font-weight: 800;
+  color: #1a1a1a;
+  line-height: 1.2;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+}
+.headline span {
+  color: #dc3545;
+}
+.subhead {
+  font-size: 1.4em;
+  color: #555;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Question hook */
+.question-box {
+  background: #1a1a1a;
+  color: #fff;
+  padding: 40px;
+  text-align: center;
+  margin: 40px 0;
+}
+.question-box h2 {
+  font-size: 1.8em;
+  margin-bottom: 20px;
+}
+.question-box p {
+  font-size: 1.2em;
+  color: #aaa;
+}
+
+/* Mistakes section */
+.mistakes {
+  padding: 50px 0;
+}
+.mistake {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 35px;
+  padding: 30px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border-left: 5px solid #dc3545;
+}
+.mistake-number {
+  width: 50px;
+  height: 50px;
+  background: #dc3545;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5em;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.mistake-content h3 {
+  font-size: 1.3em;
+  margin-bottom: 10px;
+  color: #1a1a1a;
+}
+.mistake-content p {
+  color: #555;
+}
+
+/* Curiosity gap */
+.curiosity {
+  background: #fff3cd;
+  border: 3px solid #ffc107;
+  padding: 40px;
+  margin: 40px 0;
+  text-align: center;
+  border-radius: 12px;
+}
+.curiosity h3 {
+  font-size: 1.6em;
+  margin-bottom: 15px;
+  color: #856404;
+}
+.curiosity p {
+  font-size: 1.1em;
+  color: #856404;
+}
+
+/* Proof */
+.proof-section {
+  padding: 50px 0;
+  text-align: center;
+}
+.proof-section h2 {
+  font-size: 2em;
+  margin-bottom: 30px;
+}
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+.stat-box {
+  padding: 30px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+.stat-number {
+  font-size: 2.5em;
+  font-weight: 800;
+  color: #dc3545;
+}
+.stat-label {
+  color: #555;
+  margin-top: 5px;
+}
+
+/* Testimonial */
+.testimonial {
+  background: #1a1a1a;
+  color: #fff;
+  padding: 50px;
+  margin: 40px 0;
+  border-radius: 12px;
+  text-align: center;
+}
+.testimonial-text {
+  font-size: 1.4em;
+  font-style: italic;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.testimonial-author {
+  font-weight: 700;
+  color: #aaa;
+}
+
+/* Offer */
+.offer {
+  padding: 60px 40px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+  color: #fff;
+  text-align: center;
+  border-radius: 16px;
+  margin: 40px 0;
+}
+.offer h2 {
+  font-size: 2.2em;
+  margin-bottom: 20px;
+}
+.offer-price {
+  font-size: 4em;
+  font-weight: 800;
+  color: #ffc107;
+  margin: 20px 0;
+}
+.offer-price span {
+  font-size: 0.4em;
+  color: #aaa;
+  font-weight: 400;
+}
+.offer-features {
+  text-align: left;
+  max-width: 400px;
+  margin: 30px auto;
+  list-style: none;
+}
+.offer-features li {
+  padding: 10px 0;
+  border-bottom: 1px solid #444;
+}
+.offer-features li:before {
+  content: "✓ ";
+  color: #28a745;
+  font-weight: 700;
+}
+
+/* CTA */
+.cta-button {
+  display: inline-block;
+  background: #dc3545;
+  color: #fff;
+  padding: 20px 60px;
+  font-size: 1.3em;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 8px;
+  margin: 20px 0;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.cta-button:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(220,53,69,0.4);
+}
+
+/* Urgency */
+.urgency-bar {
+  background: #dc3545;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1em;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Guarantee */
+.guarantee-box {
+  border: 3px solid #28a745;
+  padding: 30px;
+  margin: 40px 0;
+  text-align: center;
+  border-radius: 12px;
+}
+.guarantee-box h3 {
+  color: #28a745;
+  margin-bottom: 15px;
+}
+
+/* FAQ */
+.faq {
+  padding: 50px 0;
+}
+.faq h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.faq-item {
+  margin-bottom: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+.faq-item h4 {
+  margin-bottom: 10px;
+  color: #1a1a1a;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 0.9em;
+}
+
+@media (max-width: 600px) {
+  .headline { font-size: 2em; }
+  .offer-price { font-size: 3em; }
+  .mistake { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="urgency-bar">
+  ⚠️ LIMITED: Only 3 Free Analyses Per Account — Start Before They're Gone
+</div>
+
+<div class="headline-area">
+  <h1 class="headline">Do You Make These<br><span>Mistakes</span><br>in Domain Flipping?</h1>
+  <p class="subhead">The 7 costly errors that cause 94% of domain flippers to fail — and the simple system that fixes them all</p>
+</div>
+
+<div class="container">
+
+  <div class="question-box">
+    <h2>Answer These Questions Honestly:</h2>
+    <p>Are you still checking domains manually?<br>
+    Do you buy based on "gut feeling" instead of data?<br>
+    Are you missing profitable domains because you checked too late?</p>
+  </div>
+
+  <div class="mistakes">
+    <h2 style="text-align: center; margin-bottom: 40px; font-size: 2em;">The 7 Deadly Mistakes</h2>
+
+    <div class="mistake">
+      <div class="mistake-number">1</div>
+      <div class="mistake-content">
+        <h3>Checking Domains One by One</h3>
+        <p>You open GoDaddy. Type a domain. Wait. Check availability. Repeat. By the time you've checked 10 domains, someone else bought the good ones. <strong>Time cost: 3-4 hours per day.</strong></p>
+      </div>
+    </div>
+
+    <div class="mistake">
+      <div class="mistake-number">2</div>
+      <div class="mistake-content">
+        <h3>Trusting "Looks Good" Instead of Metrics</h3>
+        <p>A domain "sounds nice" so you buy it. But you didn't check backlinks, authority, or history. Result: You own a pretty name with zero value. <strong>Money lost: $50-$500 per mistake.</strong></p>
+      </div>
+    </div>
+
+    <div class="mistake">
+      <div class="mistake-number">3</div>
+      <div class="mistake-content">
+        <h3>Missing the Window</h3>
+        <p>Good expired domains get bought within minutes of dropping. If you're not checking constantly, you're missing 90% of opportunities. <strong>Opportunity cost: Unlimited.</strong></p>
+      </div>
+    </div>
+
+    <div class="mistake">
+      <div class="mistake-number">4</div>
+      <div class="mistake-content">
+        <h3>No System for Tracking Finds</h3>
+        <p>You found a great domain last Tuesday. Where did you write it down? Which notebook? Which app? By the time you find your notes, it's sold. <strong>Domains lost: Countless.</strong></p>
+      </div>
+    </div>
+
+    <div class="mistake">
+      <div class="mistake-number">5</div>
+      <div class="mistake-content">
+        <h3>Paying for Multiple Tools</h3>
+        <p>SpamZilla subscription. Domain research tool. Backlink checker. Availability API. You're spending $200+/month on tools that don't talk to each other. <strong>Monthly waste: $150+.</strong></p>
+      </div>
+    </div>
+
+    <div class="mistake">
+      <div class="mistake-number">6</div>
+      <div class="mistake-content">
+        <h3>No Monetization Strategy</h3>
+        <p>You buy domains hoping to flip them. But what if they don't sell? You need affiliate intelligence, market research, and backup monetization plans. <strong>Without this, you're gambling.</strong></p>
+      </div>
+    </div>
+
+    <div class="mistake">
+      <div class="mistake-number">7</div>
+      <div class="mistake-content">
+        <h3>Doing Everything Manually</h3>
+        <p>The pros use systems. They check hundreds of domains daily. They buy with data. They sell with confidence. You're doing everything by hand. <strong>That's why they're winning and you're not.</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="curiosity">
+    <h3>What If There Was a Better Way?</h3>
+    <p>What if you could upload a screenshot and get AI-ranked domain analysis in 90 seconds?<br>
+    What if you could check availability across 4 registrars instantly?<br>
+    What if you had a system that never sleeps, never misses, never forgets?</p>
+  </div>
+
+  <div class="proof-section">
+    <h2>Proven Results from Real Users</h2>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-number">500+</div>
+        <div class="stat-label">Active Flippers</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">50,000+</div>
+        <div class="stat-label">Domains Analyzed</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">$2M+</div>
+        <div class="stat-label">Value Discovered</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">4.9★</div>
+        <div class="stat-label">User Rating</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="testimonial">
+    <p class="testimonial-text">"I was making Mistake #1, #2, and #7 every single day. Since switching to FlipAndSift, my domain analysis time dropped from 4 hours to 20 minutes. I found 3 profitable domains in my first week. One sold for $8,400."</p>
+    <p class="testimonial-author">— David R., Full-Time Domain Flipper</p>
+  </div>
+
+  <div class="offer">
+    <h2>Stop Making These Mistakes Today</h2>
+    <p style="color: #aaa; margin-bottom: 20px;">Get the system that eliminates all 7 deadly mistakes</p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 700px; margin: 0 auto;">
+      <div>
+        <h3 style="color: #aaa; margin-bottom: 15px;">FREE</h3>
+        <div class="offer-price">$0<span>/mo</span></div>
+        <ul class="offer-features">
+          <li>3 domain analyses</li>
+          <li>Basic availability check</li>
+          <li>10-domain watchlist</li>
+          <li>Community support</li>
+        </ul>
+        <a href="/auth" class="cta-button" style="padding: 15px 40px; font-size: 1em;">Start Free</a>
+      </div>
+      <div>
+        <h3 style="color: #ffc107; margin-bottom: 15px;">PRO</h3>
+        <div class="offer-price">$97<span>/mo</span></div>
+        <ul class="offer-features">
+          <li>Unlimited analyses</li>
+          <li>All 4 registrars</li>
+          <li>Unlimited watchlist</li>
+          <li>Affiliate intelligence</li>
+          <li>API access</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="/auth" class="cta-button">Go Pro</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="guarantee-box">
+    <h3>🛡️ 30-Day "No Mistakes" Guarantee</h3>
+    <p>If FlipAndSift doesn't help you eliminate at least 3 of these 7 mistakes in your first 30 days, we'll refund every penny. No questions asked. No hard feelings.</p>
+  </div>
+
+  <div class="faq">
+    <h2>Frequently Asked Questions</h2>
+
+    <div class="faq-item">
+      <h4>Q: Do I need technical skills?</h4>
+      <p>A: No. If you can copy and paste a domain list, you can use FlipAndSift. The AI does the hard work.</p>
+    </div>
+
+    <div class="faq-item">
+      <h4>Q: What if I don't have a domain list?</h4>
+      <p>A: Upload a screenshot from SpamZilla, ExpiredDomains, or any marketplace. Our OCR extracts the domains automatically.</p>
+    </div>
+
+    <div class="faq-item">
+      <h4>Q: How accurate is the AI scoring?</h4>
+      <p>A: We analyze 12+ metrics including backlinks, authority, age, history, and availability. Users report 85%+ accuracy on profitable domain identification.</p>
+    </div>
+
+    <div class="faq-item">
+      <h4>Q: Can I cancel anytime?</h4>
+      <p>A: Yes. No contracts, no commitments, no cancellation fees.</p>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin: 50px 0;">
+    <h2 style="margin-bottom: 20px;">Which Mistake Will You Fix First?</h2>
+    <a href="/auth" class="cta-button">Start Finding Profitable Domains →</a>
+    <p style="color: #666; margin-top: 15px;">3 free analyses • No credit card required • Upgrade anytime</p>
+  </div>
+
+</div>
+
+<footer>
+  <p>© 2026 FlipAndSift. All rights reserved.</p>
+  <p style="margin-top: 10px; font-size: 0.85em;">Stop making mistakes. Start making money.</p>
+</footer>
+
+</body>
+</html>
